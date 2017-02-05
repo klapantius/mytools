@@ -10,6 +10,7 @@ namespace tfsaccess
     public interface IWorkItem
     {
         int Id { get; }
+        LinkCollection Links { get; }
     }
     public class WorkItemWrapper : IWorkItem
     {
@@ -29,5 +30,11 @@ namespace tfsaccess
         }
 
         public int Id { get { return WI.Id; } }
+        public LinkCollection Links { get { return WI.Links; } }
+
+        public override string ToString()
+        {
+            return string.Format("WI {0} {1} \"{2}\" ", WI.Id, WI.State, WI.Title, WI.Links);
+        }
     }
 }
