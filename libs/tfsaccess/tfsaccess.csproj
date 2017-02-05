@@ -48,6 +48,7 @@
     <Compile Include="ItemWrapper.cs" />
     <Compile Include="VersionControlServerWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WorkItemStoreWrapper.cs" />
     <Compile Include="WorkitemWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -8,8 +8,10 @@ using System.IO;
 using System.Diagnostics;
 using System.Xml.Linq;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using tfsaccess;
 using CmdLine = consoleapp.CmdLine;
+using Microsoft.TeamFoundation;
 
 [assembly: InternalsVisibleTo("fixtrax_utest")]
 namespace fixtrax
@@ -69,12 +71,9 @@ namespace fixtrax
                     return;
                 }
                 tracker.TrackWorkitem(workitem, dsName, dsBranch);
-                Console.ReadKey();
                 return;
             }
         }
-
-
 
     }
 
@@ -98,7 +97,13 @@ namespace fixtrax
 
         internal void TrackWorkitem(int workitem, string dsName, string dsBranch)
         {
-            throw new NotImplementedException();
+            var wi = WIS.GetWorkItem(workitem);
+            Console.WriteLine(wi.ToString());
+            foreach (var cs in GetLinkedChangesetsOf(wi).ToList())
+            {
+                TrackCS(cs.ChangesetId, dsName, dsBranch);
+            }
+            Console.ReadKey();
         }
 
         public void TrackModuleChanges(string moduleBranch, int days, string dsName, string dsBranch)
@@ -249,16 +254,44 @@ namespace fixtrax
             return path.Substring(0, path.Trim('/').LastIndexOf('/')).Trim('/');
         }
 
-        private IVersionControlServer _vcs;
+        internal IEnumerable<IChangeset> GetLinkedChangesetsOf(IWorkItem wi)
+        {
+            var result = new List<ChangesetWrapper>();
+            foreach (Link link in wi.Links)
+            {
+                ExternalLink extLink = link as ExternalLink;
+                if (extLink != null)
+                {
+                    ArtifactId artifact = LinkingUtilities.DecodeUri(extLink.LinkedArtifactUri);
+                    if (String.Equals(artifact.ArtifactType, "Changeset", StringComparison.Ordinal))
+                    {
+                        // Convert the artifact URI to Changeset object.
+                        result.Add(new ChangesetWrapper(VCS.ArtifactProvider.GetChangeset(new Uri(extLink.LinkedArtifactUri))));
+                    }
+                }
+            }
+            return result;
+        }
+
+        private IVersionControlServer vcs;
         internal IVersionControlServer VCS
         {
             get
             {
-                if (_vcs != null) return _vcs;
-                _vcs = new VersionControlServerWrapper(new Uri(ServerUri));
-                return _vcs;
+                if (vcs == null) vcs = new VersionControlServerWrapper(new Uri(ServerUri));
+                return vcs;
             }
-            set { _vcs = value; }
+            set { vcs = value; }
+        }
+
+        private IWorkItemStore wis;
+        internal IWorkItemStore WIS
+        {
+            get
+            {
+                if (wis == null) wis = new WorkItemStoreWrapper(new Uri(ServerUri));
+                return wis;
+            }
         }
     }
 
