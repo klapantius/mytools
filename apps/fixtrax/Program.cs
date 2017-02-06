@@ -1,4 +1,6 @@
-﻿﻿using Microsoft.TeamFoundation;
+﻿﻿using System.IO;
+
+﻿using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using System;
@@ -20,7 +22,8 @@ namespace fixtrax
 
       var i = new CmdLine.Interpreter();
       i.Add(new CmdLine.Parameter(new[] { "changeset", "cs" }, "changeset to track", false));
-      i.Add(new CmdLine.Parameter(new[] { "module", "mb" }, "module branch to find changes e.G. Core/PCP/v4", false));
+      i.Add(new CmdLine.Parameter(new[] { "module", "mb" }, "module branch to find changes (e.G. Core/PCP/v4) on it", false));
+      i.Add(new CmdLine.Parameter(new[] { "modules", "file" }, "a file containing module branches to find changes on there", false));
       i.Add(new CmdLine.Parameter(new[] { "days", "for" }, "find changes of last how many days", false, "2"));
       i.Add(new CmdLine.Parameter(new[] { "target", "ds" }, "target deployment set", true));
       i.Add(new CmdLine.Parameter(new[] { "branch", "tb" }, "branch of target", false, "PCP/VA30"));
@@ -46,7 +49,7 @@ namespace fixtrax
         return;
       }
 
-      if (i.IsSpecified("module"))
+      if (i.IsSpecified("module") || i.IsSpecified("modules"))
       {
         int days;
         if (!int.TryParse(i.ValueOf("days"), out days) || days <= 0)
@@ -54,7 +57,8 @@ namespace fixtrax
           Console.WriteLine("The specified number of days is not valid");
           return;
         }
-        tracker.TrackModuleChanges(i.ValueOf("module"), days, dsName, dsBranch);
+        if (i.IsSpecified("module")) tracker.TrackModuleChanges(i.ValueOf("module"), days, dsName, dsBranch);
+        else tracker.TrackModuleChangesFromInputFile(i.ValueOf("modules"), days, dsName, dsBranch);
         return;
       }
 
@@ -99,7 +103,18 @@ namespace fixtrax
       {
         TrackCS(cs.ChangesetId, dsName, dsBranch);
       }
-      Console.ReadKey();
+    }
+
+    public void TrackModuleChangesFromInputFile(string moduleFile, int days, string dsName, string dsBranch)
+    {
+      using (var f = new StreamReader(new FileStream(moduleFile, FileMode.Open, FileAccess.Read)))
+      {
+        while (!f.EndOfStream)
+        {
+          var moduleBranch = f.ReadLine();
+          TrackModuleChanges(moduleBranch, days, dsName, dsBranch);
+        }
+      }
     }
 
     public void TrackModuleChanges(string moduleBranch, int days, string dsName, string dsBranch)
@@ -168,7 +183,8 @@ namespace fixtrax
           VCS.GetChangeset(moduleChange.Item.ChangesetId),
           string.Join("/", DSRootPath, dsName, dsBranch, VersionInfoFolderPath),
           string.Format(VersionInfoFilePattern, "Deploy", dsName));
-      var dsVersion = GetModuleVersion(dsChange.Item);
+      string dsVersion = null;
+      if(dsChange!=null) dsVersion= GetModuleVersion(dsChange.Item);
 
       PrintTrackingResult(cs, scpName, moduleVersion, dsName, dsVersion);
 
@@ -176,11 +192,11 @@ namespace fixtrax
 
     private void PrintTrackingResult(IChangeset cs, string scpName, string moduleVersion, string dsName, string dsVersion)
     {
-      Console.Write("CS {0} BI:[{1}] ==> ", cs.ChangesetId, string.Join(", ", cs.WorkItems.Select(wi => wi.Id)));
+      Console.Write("CS {0} BI:[ {1} ] ==> ", cs.ChangesetId, string.Join(" ", cs.WorkItems.Select(wi => wi.Id)));
       if (string.IsNullOrEmpty(moduleVersion))
       {
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("No subsequent module version found");
+        Console.WriteLine("No subsequent {0} version found", scpName);
         Console.ResetColor();
         return;
       }
