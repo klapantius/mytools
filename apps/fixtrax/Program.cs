@@ -183,7 +183,7 @@ namespace fixtrax
           VCS.GetChangeset(moduleChange.Item.ChangesetId),
           string.Join("/", DSRootPath, dsName, dsBranch, VersionInfoFolderPath),
           string.Format(VersionInfoFilePattern, "Deploy", dsName));
-      string dsVersion = null;
+      string dsVersion = "has this version, but no ds version yet";
       if(dsChange!=null) dsVersion= GetModuleVersion(dsChange.Item);
 
       PrintTrackingResult(cs, scpName, moduleVersion, dsName, dsVersion);
