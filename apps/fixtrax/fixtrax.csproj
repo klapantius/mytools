@@ -48,6 +48,9 @@
     <Compile Include="..\..\consoleapp\CmdLine.cs">
       <Link>CmdLine.cs</Link>
     </Compile>
+    <Compile Include="..\..\consoleapp\Out.cs">
+      <Link>Out.cs</Link>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

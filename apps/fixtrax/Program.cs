@@ -1,5 +1,7 @@
 ﻿﻿using System.IO;
 
+﻿using consoleapp;
+
 ﻿using Microsoft.TeamFoundation;
 using Microsoft.TeamFoundation.VersionControl.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
@@ -28,6 +30,7 @@ namespace fixtrax
       i.Add(new CmdLine.Parameter(new[] { "target", "ds" }, "target deployment set", true));
       i.Add(new CmdLine.Parameter(new[] { "branch", "tb" }, "branch of target", false, "PCP/VA30"));
       i.Add(new CmdLine.Parameter(new[] { "workitem", "wi", "bi" }, "workitem to track", false));
+      i.Add(new CmdLine.Parameter(new[] { "verbose", "v" }, "0 or 1", false, "0"));
       if (!i.Parse(string.Join(" ", args)))
       {
         i.PrintErrors("push.exe");
@@ -36,6 +39,8 @@ namespace fixtrax
 
       var dsName = i.ValueOf("target");
       var dsBranch = i.ValueOf("branch");
+      var v = int.Parse(i.ValueOf("verbose"));
+      Out.VerbosityLevel = v < 0 ? 0 : (v > 1 ? 1 : v);
 
       if (i.IsSpecified("changeset"))
       {
@@ -184,7 +189,7 @@ namespace fixtrax
           string.Join("/", DSRootPath, dsName, dsBranch, VersionInfoFolderPath),
           string.Format(VersionInfoFilePattern, "Deploy", dsName));
       string dsVersion = "has this version, but no ds version yet";
-      if(dsChange!=null) dsVersion= GetModuleVersion(dsChange.Item);
+      if (dsChange != null) dsVersion = GetModuleVersion(dsChange.Item);
 
       PrintTrackingResult(cs, scpName, moduleVersion, dsName, dsVersion);
 
@@ -305,18 +310,6 @@ namespace fixtrax
     }
   }
 
-  public static class Out
-  {
-    public static int VerbosityLevel = 0;
-    public static void Log(string fmt, params object[] args) { if (VerbosityLevel > 0) Print(ConsoleColor.DarkGray, fmt, args); }
-
-    private static void Print(ConsoleColor color, string fmt, params object[] args)
-    {
-      Console.ForegroundColor = color;
-      Console.WriteLine(fmt, args);
-      Console.ResetColor();
-    }
-  }
   internal class FixTraxException : Exception
   {
     public FixTraxException(string fmt, params object[] args)

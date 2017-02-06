@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace consoleapp.CmdLine
 {
     public class Interpreter
     {
-        private List<Parameter> parameters = new List<Parameter>();
+        private readonly List<Parameter> parameters = new List<Parameter>();
         public string ValueOf(string paramName)
         {
             var asked = parameters.FirstOrDefault(p => p.Matches(paramName));
@@ -35,7 +33,7 @@ namespace consoleapp.CmdLine
             const string ParamSeparators = "/-";
             const string ValueSeparators = ":=";
             Errors.Clear();
-            var sub = @"( [\/\-].*)";
+            const string sub = @"( [\/\-].*)";
             var pattern = @"[\/\-](.*)";
             while (new Regex(pattern + sub).IsMatch(commandLine)) pattern += sub;
             var groups = new Regex(pattern).Match(commandLine).Groups;
@@ -67,7 +65,7 @@ namespace consoleapp.CmdLine
 
         public void PrintErrors(string prgName)
         {
-            Errors.ForEach(e => Console.WriteLine(e));
+            Errors.ForEach(Console.WriteLine);
             Console.WriteLine("\nusage:");
             Console.WriteLine("{0} {1}", prgName, string.Join(" ", parameters.Select(p => p.ToString())));
         }
@@ -93,7 +91,7 @@ namespace consoleapp.CmdLine
 
         public bool Matches(Parameter other)
         {
-            return this.Names.Any(n => other.Names.Any(o => o == n));
+            return Names.Any(n => other.Names.Any(o => o == n));
         }
         public bool Matches(string name)
         {
