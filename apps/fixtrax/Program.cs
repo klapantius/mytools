@@ -223,16 +223,14 @@ namespace fixtrax
 
     internal IChange FindVersionOf(IChangeset cs, string vfolder, string vfile)
     {
-      var changesets = VCS.QueryHistory(string.Join("/", vfolder, vfile), RecursionType.None, 10);
-      if (changesets.Count() == 0) throw new FixTraxException("Could not find module version history for \"{0}\"", vfile);
-      var i = 1;
-      var found = false;
-      while (!(found = (changesets.Last().ChangesetId < cs.ChangesetId && i++ < 11)))
-      {
-        changesets = VCS.QueryHistory(string.Join("/", vfolder, vfile), RecursionType.None, i * 10);
-      }
-      if (!found) return null;
-      var versioncs = changesets.ToList().LastOrDefault(c => c.ChangesetId > cs.ChangesetId);
+      var changesets = VCS.QueryHistory(
+        new QueryHistoryParameters(string.Join("/", vfolder, vfile), RecursionType.None)
+        {
+          SortAscending = true,
+          VersionStart = new DateVersionSpec(cs.CreationDate),
+          IncludeChanges = true
+        });
+      var versioncs = changesets.ToList().FirstOrDefault(c => c.ChangesetId > cs.ChangesetId);
       if (versioncs == null) return null;
       return versioncs.Changes.SingleOrDefault(c => c.Item.ServerItem.EndsWith(vfile, StringComparison.InvariantCultureIgnoreCase));
     }
