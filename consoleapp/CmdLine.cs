@@ -10,8 +10,29 @@ namespace consoleapp.CmdLine
         private readonly List<Parameter> parameters = new List<Parameter>();
         public string ValueOf(string paramName)
         {
-            var asked = parameters.FirstOrDefault(p => p.Matches(paramName));
-            return asked != null ? asked.Value : string.Empty;
+          var asked = parameters.FirstOrDefault(p => p.Matches(paramName));
+          return asked != null ? asked.Value : string.Empty;
+        }
+
+        public string ValueOf(string paramName, Func<bool, string> validation)
+        {
+          var asked = parameters.FirstOrDefault(p => p.Matches(paramName));
+          return asked != null ? asked.Value : string.Empty;
+        }
+
+        public static int DefaultIntConverter(string str)
+        {
+          var result = int.MinValue;
+          int.TryParse(str, out result);
+          return result;
+        }
+
+        public T Evaluate<T>(string paramName, Func<string, T> converter, params Action<T>[] validator)
+        {
+          var asked = parameters.FirstOrDefault(p => p.Matches(paramName));
+          var result = converter(asked != null ? asked.Value : string.Empty);
+          validator.ToList().ForEach(v => v(result));
+          return result;
         }
 
         public bool IsSpecified(string paramName)

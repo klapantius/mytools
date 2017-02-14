@@ -1,4 +1,5 @@
-﻿﻿using System.IO;
+﻿﻿using System.Diagnostics;
+﻿using System.IO;
 
 ﻿using consoleapp;
 
@@ -42,24 +43,16 @@ namespace fixtrax
 
       if (i.IsSpecified("changeset"))
       {
-        int csid;
-        if (!int.TryParse(i.ValueOf("changeset"), out csid) || csid <= 0)
-        {
-          Console.WriteLine("The specified changeset id is not valid");
-          return;
-        }
+        var csid = i.Evaluate<int>("changeset", CmdLine.Interpreter.DefaultIntConverter,
+          (x) => { if (x <= 0) throw new Exception("The specified changeset id is not valid"); });
         tracker.TrackCS(csid, dsName);
         return;
       }
 
       if (i.IsSpecified("module") || i.IsSpecified("modules"))
       {
-        int days;
-        if (!int.TryParse(i.ValueOf("days"), out days) || days <= 0)
-        {
-          Console.WriteLine("The specified number of days is not valid");
-          return;
-        }
+        var days = i.Evaluate<int>("days", CmdLine.Interpreter.DefaultIntConverter,
+          (x) => { if (x <= 0) throw new Exception("The specified number of days is not valid"); });
         if (i.IsSpecified("module")) tracker.TrackModuleChanges(i.ValueOf("module"), days, dsName);
         else tracker.TrackModuleChangesFromInputFile(i.ValueOf("modules"), days, dsName);
         return;
@@ -67,12 +60,8 @@ namespace fixtrax
 
       if (i.IsSpecified("workitem"))
       {
-        int workitem;
-        if (!int.TryParse(i.ValueOf("workitem"), out workitem) || workitem <= 0)
-        {
-          Console.WriteLine("The specified workitem id is not valid");
-          return;
-        }
+        var workitem = i.Evaluate<int>("workitem", CmdLine.Interpreter.DefaultIntConverter,
+          (x) => { if (x <= 0) throw new Exception("The specified workitem id is not valid"); });
         tracker.TrackWorkitem(workitem, dsName);
         return;
       }
@@ -100,6 +89,7 @@ namespace fixtrax
 
     internal void TrackWorkitem(int workitem, string dsName)
     {
+      Out.Log("called TrackWorkitem({0}, {1})", workitem, dsName);
       var wi = WIS.GetWorkItem(workitem);
       Console.WriteLine(wi.ToString());
       foreach (var cs in GetLinkedChangesetsOf(wi).ToList())
@@ -185,7 +175,7 @@ namespace fixtrax
       var dsChange = FindVersionOf(
           VCS.GetChangeset(moduleChange.Item.ChangesetId),
           string.Join("/", DSRootPath, dsName, VersionInfoFolderPath),
-          string.Format(VersionInfoFilePattern, "Deploy", dsName.Split('/','\\')[0]));
+          string.Format(VersionInfoFilePattern, "Deploy", dsName.Split('/', '\\')[0]));
       string dsVersion = "has this version, but no ds version yet";
       if (dsChange != null) dsVersion = GetModuleVersion(dsChange.Item);
 
