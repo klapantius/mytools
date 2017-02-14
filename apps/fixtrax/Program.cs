@@ -27,10 +27,9 @@ namespace fixtrax
       i.Add(new CmdLine.Parameter(new[] { "module", "mb" }, "module branch to find changes (e.G. Core/PCP/v4) on it", false));
       i.Add(new CmdLine.Parameter(new[] { "modules", "file" }, "a file containing module branches to find changes on there", false));
       i.Add(new CmdLine.Parameter(new[] { "days", "for" }, "find changes of last how many days", false, "2"));
-      i.Add(new CmdLine.Parameter(new[] { "target", "ds" }, "target deployment set", true));
-      i.Add(new CmdLine.Parameter(new[] { "branch", "tb" }, "branch of target", false, "PCP/VA30"));
+      i.Add(new CmdLine.Parameter(new[] { "target", "ds" }, "target deployment set such Torus/PCP/VA30", true));
       i.Add(new CmdLine.Parameter(new[] { "workitem", "wi", "bi" }, "workitem to track", false));
-      i.Add(new CmdLine.Parameter(new[] { "verbose", "v" }, "0 or 1", false, "0"));
+      i.Add(new CmdLine.Parameter(new[] { "verbose", "v" }, "verbose mode", false, "false"));
       if (!i.Parse(string.Join(" ", args)))
       {
         i.PrintErrors("push.exe");
@@ -38,9 +37,8 @@ namespace fixtrax
       }
 
       var dsName = i.ValueOf("target");
-      var dsBranch = i.ValueOf("branch");
-      var v = int.Parse(i.ValueOf("verbose"));
-      Out.VerbosityLevel = v < 0 ? 0 : (v > 1 ? 1 : v);
+      var v = bool.Parse(i.ValueOf("verbose"));
+      Out.VerbosityLevel = v ? 1 : 0;
 
       if (i.IsSpecified("changeset"))
       {
@@ -50,7 +48,7 @@ namespace fixtrax
           Console.WriteLine("The specified changeset id is not valid");
           return;
         }
-        tracker.TrackCS(csid, dsName, dsBranch);
+        tracker.TrackCS(csid, dsName);
         return;
       }
 
@@ -62,8 +60,8 @@ namespace fixtrax
           Console.WriteLine("The specified number of days is not valid");
           return;
         }
-        if (i.IsSpecified("module")) tracker.TrackModuleChanges(i.ValueOf("module"), days, dsName, dsBranch);
-        else tracker.TrackModuleChangesFromInputFile(i.ValueOf("modules"), days, dsName, dsBranch);
+        if (i.IsSpecified("module")) tracker.TrackModuleChanges(i.ValueOf("module"), days, dsName);
+        else tracker.TrackModuleChangesFromInputFile(i.ValueOf("modules"), days, dsName);
         return;
       }
 
@@ -75,7 +73,7 @@ namespace fixtrax
           Console.WriteLine("The specified workitem id is not valid");
           return;
         }
-        tracker.TrackWorkitem(workitem, dsName, dsBranch);
+        tracker.TrackWorkitem(workitem, dsName);
         return;
       }
     }
@@ -100,29 +98,29 @@ namespace fixtrax
     }
     #endregion constants
 
-    internal void TrackWorkitem(int workitem, string dsName, string dsBranch)
+    internal void TrackWorkitem(int workitem, string dsName)
     {
       var wi = WIS.GetWorkItem(workitem);
       Console.WriteLine(wi.ToString());
       foreach (var cs in GetLinkedChangesetsOf(wi).ToList())
       {
-        TrackCS(cs.ChangesetId, dsName, dsBranch);
+        TrackCS(cs.ChangesetId, dsName);
       }
     }
 
-    public void TrackModuleChangesFromInputFile(string moduleFile, int days, string dsName, string dsBranch)
+    public void TrackModuleChangesFromInputFile(string moduleFile, int days, string dsName)
     {
       using (var f = new StreamReader(new FileStream(moduleFile, FileMode.Open, FileAccess.Read)))
       {
         while (!f.EndOfStream)
         {
           var moduleBranch = f.ReadLine();
-          TrackModuleChanges(moduleBranch, days, dsName, dsBranch);
+          TrackModuleChanges(moduleBranch, days, dsName);
         }
       }
     }
 
-    public void TrackModuleChanges(string moduleBranch, int days, string dsName, string dsBranch)
+    public void TrackModuleChanges(string moduleBranch, int days, string dsName)
     {
       // load history of the module for the specified number of days
       VCS.QueryHistory(
@@ -134,11 +132,11 @@ namespace fixtrax
           .ToList()
           .ForEach(c =>
           {
-            if (c.WorkItems.Any()) TrackCS(c.ChangesetId, dsName, dsBranch);
+            if (c.WorkItems.Any()) TrackCS(c.ChangesetId, dsName);
           });
     }
 
-    public void TrackCS(int csid, string dsName, string dsBranch)
+    public void TrackCS(int csid, string dsName)
     {
       // load config data
 
@@ -159,7 +157,7 @@ namespace fixtrax
         PrintTrackingResult(cs, scpName, null, dsName, null);
         return;
       }
-      Out.Log("{1} CS {0} identified as subsequent version upload", moduleChange.Item.ChangesetId, scpVersionFileName);
+      Out.Log("{2}/{1} CS {0} identified as subsequent version upload", moduleChange.Item.ChangesetId, scpVersionFileName, scpVersionFolder);
       var moduleVersion = GetModuleVersion(moduleChange.Item);
       var elapsedTime = moduleChange.Item.CheckinDate - cs.CreationDate;
       Out.Log("{1} {2} (C{3}{4})",
@@ -172,7 +170,7 @@ namespace fixtrax
         // find next change after the version created
         var modulePush = FindVersionOf(
             VCS.GetChangeset(moduleChange.Item.ChangesetId),
-            string.Join("/", DSRootPath, dsName, dsBranch, VersionInfoFolderPath),
+            string.Join("/", DSRootPath, dsName, VersionInfoFolderPath),
             scpVersionFileName);
         if (modulePush == null)
         {
@@ -182,12 +180,12 @@ namespace fixtrax
         var modulVersionInTorus = GetModuleVersion(modulePush.Item);
       }
 
-      // load history of the Torus version file
-      // find next change after the module version arrived Torus
+      // load history of the DS version file
+      // find next change after the module version arrived the DS
       var dsChange = FindVersionOf(
           VCS.GetChangeset(moduleChange.Item.ChangesetId),
-          string.Join("/", DSRootPath, dsName, dsBranch, VersionInfoFolderPath),
-          string.Format(VersionInfoFilePattern, "Deploy", dsName));
+          string.Join("/", DSRootPath, dsName, VersionInfoFolderPath),
+          string.Format(VersionInfoFilePattern, "Deploy", dsName.Split('/','\\')[0]));
       string dsVersion = "has this version, but no ds version yet";
       if (dsChange != null) dsVersion = GetModuleVersion(dsChange.Item);
 
@@ -214,7 +212,7 @@ namespace fixtrax
         Console.ResetColor();
         return;
       }
-      Console.WriteLine("{0} {1}", dsName, dsVersion);
+      Console.WriteLine("{0} {1}", dsName.Split('/', '\\')[0], dsVersion);
     }
 
     internal string GetModuleVersion(IItem item)
@@ -228,16 +226,22 @@ namespace fixtrax
 
     internal IChange FindVersionOf(IChangeset cs, string vfolder, string vfile)
     {
+      Out.Log("Looking for CSs of {0}/{1} not older than {2}", vfolder, vfile, cs.ChangesetId);
       var changesets = VCS.QueryHistory(
         new QueryHistoryParameters(string.Join("/", vfolder, vfile), RecursionType.None)
         {
           SortAscending = true,
-          VersionStart = new DateVersionSpec(cs.CreationDate),
+          VersionStart = new ChangesetVersionSpec(cs.ChangesetId),
           IncludeChanges = true
-        });
-      var versioncs = changesets.ToList().FirstOrDefault(c => c.ChangesetId > cs.ChangesetId);
-      if (versioncs == null) return null;
-      return versioncs.Changes.SingleOrDefault(c => c.Item.ServerItem.EndsWith(vfile, StringComparison.InvariantCultureIgnoreCase));
+        }).ToList();
+      Out.Log("Found {0} CSs", changesets.Count());
+      var versioncs = changesets.FirstOrDefault(c => c.ChangesetId > cs.ChangesetId);
+      if (versioncs == null) { Out.Log("no newer CS found"); return null; }
+      var result = versioncs.Changes.SingleOrDefault(c => c.Item.ServerItem.EndsWith(vfile, StringComparison.InvariantCultureIgnoreCase));
+      Out.Log("CS identified as next version change: {0} ", versioncs.ChangesetId,
+        result != null ? "" :
+        string.Format("the first newer CS is not a good found, 'cos it doesn't change {0} :(", vfile));
+      return result;
     }
 
     internal string GetSCPName(string path)
