@@ -45,10 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\consoleapp\CmdLine.cs">
+    <Compile Include="..\..\libs\consoleapp\CmdLine.cs">
       <Link>CmdLine.cs</Link>
     </Compile>
-    <Compile Include="..\..\consoleapp\Out.cs">
+    <Compile Include="..\..\libs\consoleapp\Out.cs">
       <Link>Out.cs</Link>
     </Compile>
     <Compile Include="Program.cs" />

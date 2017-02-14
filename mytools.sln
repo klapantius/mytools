@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tfsaccess", "libs\tfsaccess
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fixtrax_utest", "tests\fixtrax_utest\fixtrax_utest.csproj", "{ACC0C293-0F42-4B58-A801-21746B378003}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "consoleapp", "consoleapp\consoleapp.csproj", "{57B98BD1-463F-46B7-8EC2-33A6169A41F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "consoleapp", "libs\consoleapp\consoleapp.csproj", "{57B98BD1-463F-46B7-8EC2-33A6169A41F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
