@@ -36,34 +36,42 @@ namespace fixtrax
         i.PrintErrors("push.exe");
         return;
       }
+      Out.VerbosityLevel = bool.Parse(i.ValueOf("verbose")) ? 1 : 0;
 
-      var dsName = i.ValueOf("target");
-      var v = bool.Parse(i.ValueOf("verbose"));
-      Out.VerbosityLevel = v ? 1 : 0;
-
-      if (i.IsSpecified("changeset"))
+      try
       {
-        var csid = i.Evaluate<int>("changeset", CmdLine.Interpreter.DefaultIntConverter,
-          (x) => { if (x <= 0) throw new Exception("The specified changeset id is not valid"); });
-        tracker.TrackCS(csid, dsName);
-        return;
+          var dsName = i.ValueOf("target");
+
+          if (i.IsSpecified("changeset"))
+          {
+              var csid = i.Evaluate<int>("changeset", CmdLine.Interpreter.DefaultIntConverter,
+                (x) => { if (x <= 0) throw new Exception("The specified changeset id is not valid"); });
+              tracker.TrackCS(csid, dsName);
+              return;
+          }
+
+          if (i.IsSpecified("module") || i.IsSpecified("modules"))
+          {
+              var days = i.Evaluate<int>("days", CmdLine.Interpreter.DefaultIntConverter,
+                (x) => { if (x <= 0) throw new Exception("The specified number of days is not valid"); });
+              if (i.IsSpecified("module")) tracker.TrackModuleChanges(i.ValueOf("module"), days, dsName);
+              else tracker.TrackModuleChangesFromInputFile(i.ValueOf("modules"), days, dsName);
+              return;
+          }
+
+          if (i.IsSpecified("workitem"))
+          {
+              var workitem = i.Evaluate<int>("workitem", CmdLine.Interpreter.DefaultIntConverter,
+                (x) => { if (x <= 0) throw new Exception("The specified workitem id is not valid"); });
+              tracker.TrackWorkitem(workitem, dsName);
+              return;
+          }
+
       }
-
-      if (i.IsSpecified("module") || i.IsSpecified("modules"))
+      catch (Exception e)
       {
-        var days = i.Evaluate<int>("days", CmdLine.Interpreter.DefaultIntConverter,
-          (x) => { if (x <= 0) throw new Exception("The specified number of days is not valid"); });
-        if (i.IsSpecified("module")) tracker.TrackModuleChanges(i.ValueOf("module"), days, dsName);
-        else tracker.TrackModuleChangesFromInputFile(i.ValueOf("modules"), days, dsName);
-        return;
-      }
-
-      if (i.IsSpecified("workitem"))
-      {
-        var workitem = i.Evaluate<int>("workitem", CmdLine.Interpreter.DefaultIntConverter,
-          (x) => { if (x <= 0) throw new Exception("The specified workitem id is not valid"); });
-        tracker.TrackWorkitem(workitem, dsName);
-        return;
+          Console.WriteLine("{0} caught: {1}", e.GetType().Name, e.Message);
+          Out.Log(e.ToString());
       }
     }
 
