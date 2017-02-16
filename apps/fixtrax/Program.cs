@@ -29,8 +29,8 @@ namespace fixtrax
       i.Add(new CmdLine.Parameter(new[] { "modules", "file" }, "a file containing module branches to find changes on there", false));
       i.Add(new CmdLine.Parameter(new[] { "days", "for" }, "find changes of last how many days", false, "2"));
       i.Add(new CmdLine.Parameter(new[] { "target", "ds" }, "target deployment set such Torus/PCP/VA30", true));
-      i.Add(new CmdLine.Parameter(new[] { "workitem", "wi", "bi" }, "workitem to track", false));
-      i.Add(new CmdLine.Parameter(new[] { "verbose", "v" }, "verbose mode", false, "false"));
+      i.Add(new CmdLine.Parameter(new[] { "workitem", "wi", "bi", "defect" }, "workitem to track", false));
+      i.Add(new CmdLine.Parameter(new[] { "verbose", "v", "debug", "d" }, "verbose mode", false, "false"));
       if (!i.Parse(string.Join(" ", args)))
       {
         i.PrintErrors("push.exe");
