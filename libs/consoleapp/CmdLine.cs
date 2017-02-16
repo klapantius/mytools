@@ -40,13 +40,14 @@ namespace consoleapp.CmdLine
       return !string.IsNullOrEmpty(ValueOf(paramName));
     }
 
-    public void Add(Parameter parameter)
+    public Parameter Add(Parameter parameter)
     {
       if (parameters.Any(p => p.Matches(parameter)))
       {
         throw new Exception(string.Format("Parameter definition \"{0}\" is ambiguous.", parameter.Names.First()));
       }
       parameters.Add(parameter);
+      return parameter;
     }
 
     public bool Parse(string commandLine)
@@ -102,6 +103,8 @@ namespace consoleapp.CmdLine
     bool Matches(Parameter other);
     bool Matches(string name);
     string ToString();
+    List<string> CoParams { get; }
+    void Requires(params string[] coparams);
   }
 
   public class Parameter : IParameter
@@ -112,14 +115,21 @@ namespace consoleapp.CmdLine
     public bool IsMandatory { get; private set; }
     public string DefaultValue { get; private set; }
     public string Value { get; internal set; }
+    private List<string> myCoParams = new List<string>();
+    public List<string> CoParams { get { return myCoParams; } }
 
-    public Parameter(string[] names, string description, bool isMandatory, string defaultValue = "")
+    public Parameter(IEnumerable<string> names, string description, bool isMandatory, string defaultValue = "")
     {
       Names = names.Select(n => n.ToLower()).ToArray();
       Description = description;
       IsMandatory = isMandatory;
       DefaultValue = IsMandatory ? InvalidValue : defaultValue;
       Value = DefaultValue;
+    }
+
+    public void Requires(params string[] coparams)
+    {
+      myCoParams.AddRange(coparams.Where(newOne => !myCoParams.Any(myOne => myOne.Equals(newOne, StringComparison.InvariantCultureIgnoreCase))));
     }
 
     public bool Matches(Parameter other)
