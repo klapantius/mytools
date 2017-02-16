@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace consoleapp.CmdLine
 {
+  [assembly: InternalsVisibleTo("CmdLine_uTest")]
   public class Interpreter
   {
     private readonly List<Parameter> parameters = new List<Parameter>();
@@ -79,6 +81,13 @@ namespace consoleapp.CmdLine
           .Where(p => p.IsMandatory && p.Value == Parameter.InvalidValue)
           .ToList()
           .ForEach(p => Errors.Add(string.Format("Missing mandatory parameter \"{0}\"", p.Names.First())));
+      parameters
+        .Where(p => p.CoParams.Any(c => ValueOf("c")==Parameter.InvalidValue))
+        .ToList()
+        .ForEach(p => p.CoParams
+          .Where(c => ValueOf(c)==Parameter.InvalidValue)
+          .ToList()
+          .ForEach(c => Errors.Add(string.Format("Parameter \"{0}\" requires parameter \"{1}\"", p.Names.First(), c))));
       return !Errors.Any();
     }
 
@@ -109,13 +118,13 @@ namespace consoleapp.CmdLine
 
   public class Parameter : IParameter
   {
-    public const string InvalidValue = "invalid value 9a9f9v0adfg";
+    public static readonly string InvalidValue = "invalid value 9a9f9v0adfg";
     public string[] Names { get; private set; }
     public string Description { get; private set; }
     public bool IsMandatory { get; private set; }
     public string DefaultValue { get; private set; }
     public string Value { get; internal set; }
-    private List<string> myCoParams = new List<string>();
+    private readonly List<string> myCoParams = new List<string>();
     public List<string> CoParams { get { return myCoParams; } }
 
     public Parameter(IEnumerable<string> names, string description, bool isMandatory, string defaultValue = "")
