@@ -82,12 +82,12 @@ namespace consoleapp.CmdLine
           .ToList()
           .ForEach(p => Errors.Add(string.Format("Missing mandatory parameter \"{0}\"", p.Names.First())));
       parameters
-        .Where(p => p.CoParams.Any(c => ValueOf("c")==Parameter.InvalidValue))
+        .Where(p => p.CoParams.Any(c => ValueOf(c)==Parameter.InvalidValue))
         .ToList()
         .ForEach(p => p.CoParams
           .Where(c => ValueOf(c)==Parameter.InvalidValue)
           .ToList()
-          .ForEach(c => Errors.Add(string.Format("Parameter \"{0}\" requires parameter \"{1}\"", p.Names.First(), c))));
+          .ForEach(c => Errors.Add(string.Format("Parameter \"{0}\" requires parameter \"{1}\".", p.Names.First(), c))));
       return !Errors.Any();
     }
 
@@ -118,7 +118,7 @@ namespace consoleapp.CmdLine
 
   public class Parameter : IParameter
   {
-    public static readonly string InvalidValue = "invalid value 9a9f9v0adfg";
+    public const string InvalidValue = "invalid value 9a9f9v0adfg";
     public string[] Names { get; private set; }
     public string Description { get; private set; }
     public bool IsMandatory { get; private set; }
@@ -127,7 +127,7 @@ namespace consoleapp.CmdLine
     private readonly List<string> myCoParams = new List<string>();
     public List<string> CoParams { get { return myCoParams; } }
 
-    public Parameter(IEnumerable<string> names, string description, bool isMandatory, string defaultValue = "")
+    public Parameter(IEnumerable<string> names, string description, bool isMandatory, string defaultValue = InvalidValue)
     {
       Names = names.Select(n => n.ToLower()).ToArray();
       Description = description;
