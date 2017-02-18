@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <TFSUri>https://tfs.healthcare.siemens.net:8090/tfs</TFSUri>
+  <TPC>IKM.TPC.Projects</TPC>
+  <TeamProject>syngo.net</TeamProject>
+  <VersionInfoPath>_Globals/VersionInformation</VersionInfoPath>
+  <VersionNodeName>Version</VersionNodeName>
+</Configuration>
