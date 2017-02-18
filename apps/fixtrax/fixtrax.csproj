@@ -45,12 +45,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\libs\consoleapp\CmdLine.cs">
-      <Link>CmdLine.cs</Link>
-    </Compile>
-    <Compile Include="..\..\libs\consoleapp\Out.cs">
-      <Link>Out.cs</Link>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -58,6 +52,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\libs\consoleapp\consoleapp.csproj">
+      <Project>{57b98bd1-463f-46b7-8ec2-33a6169a41f8}</Project>
+      <Name>consoleapp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\libs\tfsaccess\tfsaccess.csproj">
       <Project>{7f76a28e-ba50-42b1-bba4-88a83d2732e0}</Project>
       <Name>tfsaccess</Name>
