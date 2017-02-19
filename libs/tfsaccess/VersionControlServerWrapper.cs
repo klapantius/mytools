@@ -12,6 +12,7 @@ namespace tfsaccess
     {
         IChangeset GetChangeset(int id);
         IItem GetItem(string path);
+        IItemSet GetItems(string path);
         IEnumerable<IChangeset> QueryHistory(string item, RecursionType recursion, int maxResults);
         IEnumerable<IChangeset> QueryHistory(QueryHistoryParameters qhp);
         VersionControlArtifactProvider ArtifactProvider { get; }
@@ -43,6 +44,11 @@ namespace tfsaccess
         public IItem GetItem(string path)
         {
             return new ItemWrapper(VCS.GetItem(path, VersionSpec.Latest, DeletedState.Any, GetItemsOptions.IncludeBranchInfo));
+        }
+
+        public IItemSet GetItems(string path)
+        {
+            return new ItemSetWrapper(VCS.GetItems(new ItemSpec(path, RecursionType.None), VersionSpec.Latest, DeletedState.NonDeleted, ItemType.Any, GetItemsOptions.IncludeBranchInfo));
         }
 
         public IEnumerable<IChangeset> QueryHistory(string item, RecursionType recursion, int maxResults)

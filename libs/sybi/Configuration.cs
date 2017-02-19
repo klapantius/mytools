@@ -20,12 +20,12 @@ namespace sybi
         public string VersionNodeName;
     }
 
-    public class Configuration
+    public static class Configuration
     {
         public static string ConfigFileName = "sybi.xml";
 
-        private ConfigurationData myData;
-        public ConfigurationData Data
+        private static ConfigurationData myData;
+        public static ConfigurationData Data
         {
             get
             {
@@ -45,9 +45,10 @@ namespace sybi
                 }
                 return myData;
             }
+            internal set { myData = value; }
         }
 
-        internal void WriteSampleConfigurationFile()
+        internal static void WriteSampleConfigurationFile()
         {
             var sampleData = new ConfigurationData()
             {

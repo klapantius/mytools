@@ -26,7 +26,7 @@ namespace tfsaccess
         }
         public WorkItemStoreWrapper(Uri serverUri)
         {
-            var server = TeamFoundationServerFactory.GetServer(serverUri);
+            var server = TfsTeamProjectCollectionFactory.GetTeamProjectCollection(serverUri);
             wis = server.GetService<WorkItemStore>();
         }
 

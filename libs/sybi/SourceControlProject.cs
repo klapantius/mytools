@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace sybi
 {
-    class SourceControlProject
+    public interface ISourceControlProject
+    {
+        IEnumerable<IBranch> Branches { get; }
+    }
+    public class SourceControlProject
     {
     }
 }

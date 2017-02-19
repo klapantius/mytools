@@ -18,9 +18,8 @@ namespace sybi_utest
         {
             try
             {
-                var sut = new Configuration();
-                Assert.IsNotNull(sut.Data, "Unexpected result while checking loaded configuration data");
-                Assert.IsFalse(string.IsNullOrEmpty(sut.Data.TFSUri), "Unexpected result for string.IsNullOrEmpty(sut.Data.TFSUri)");
+                Assert.IsNotNull(Configuration.Data, "Unexpected result while checking loaded configuration data");
+                Assert.IsFalse(string.IsNullOrEmpty(Configuration.Data.TFSUri), "Unexpected result for string.IsNullOrEmpty(sut.Data.TFSUri)");
             }
             catch (Exception e)
             {

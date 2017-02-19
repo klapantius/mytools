@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="ChangesetWrapper.cs" />
     <Compile Include="ChangeWrapper.cs" />
+    <Compile Include="ItemSetWrapper.cs" />
     <Compile Include="TFSAccessException.cs" />
     <Compile Include="ItemWrapper.cs" />
     <Compile Include="VersionControlServerWrapper.cs" />
