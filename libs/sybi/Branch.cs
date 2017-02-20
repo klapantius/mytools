@@ -15,10 +15,11 @@ namespace sybi
     public class Branch : IBranch
     {
         private string myBranchPath;
-        internal IItemSet myLatesVersionInfo;
+        private string myScpPath;
         public string Error { get; internal set; }
         public Branch(string scpPath, string branchPath)
         {
+            myScpPath = scpPath;
             myBranchPath = branchPath;
         }
 
