@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace sybi
@@ -18,6 +13,7 @@ namespace sybi
         public string TeamProject;
         public string VersionInfoPath;
         public string VersionNodeName;
+        public string VersionFileNameConstantPart;
     }
 
     public static class Configuration
@@ -56,7 +52,8 @@ namespace sybi
                 TFSUri = "https://tfs.healthcare.siemens.net:8090/tfs",
                 TPC = "IKM.TPC.Projects",
                 VersionNodeName = "Version",
-                VersionInfoPath = "_Globals/VersionInformation"
+                VersionInfoPath = "_Globals/VersionInformation",
+                VersionFileNameConstantPart = "_ReferenceVersions"
             };
             var serializer = new XmlSerializer(typeof(ConfigurationData));
             var str = Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetName().CodeBase);

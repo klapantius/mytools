@@ -11,7 +11,6 @@ namespace sybi
     }
     public class VersionInfo
     {
-        private const string ConstantPartOfFileName = "_VersionInformation";
         private IItem myItem;
         private string scpName;
         public string ScpName
@@ -20,8 +19,8 @@ namespace sybi
             {
                 if (string.IsNullOrEmpty(scpName))
                 {
-                    var fname = myItem.ServerItem.Split('/').Last().Split('.').FirstOrDefault(x => x.Contains(ConstantPartOfFileName));
-                    if (!string.IsNullOrEmpty(fname)) scpName=fname.Replace(ConstantPartOfFileName, "");
+                    var fname = myItem.ServerItem.Split('/').Last().Split('.').FirstOrDefault(x => x.Contains(Configuration.Data.VersionFileNameConstantPart));
+                    if (!string.IsNullOrEmpty(fname)) scpName = fname.Replace(Configuration.Data.VersionFileNameConstantPart, "");
                 } return scpName;
             }
             internal set { scpName = value; }
