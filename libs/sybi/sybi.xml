@@ -5,4 +5,5 @@
   <TeamProject>syngo.net</TeamProject>
   <VersionInfoPath>_Globals/VersionInformation</VersionInfoPath>
   <VersionNodeName>Version</VersionNodeName>
+  <VersionFileNameConstantPart>_ReferenceVersions</VersionFileNameConstantPart>
 </Configuration>

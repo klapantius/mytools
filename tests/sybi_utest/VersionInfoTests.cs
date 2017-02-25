@@ -16,7 +16,7 @@ namespace sybi_utest
         public void ScpNameCanBeExtractedFromItemInformation()
         {
             var mockedItem = new Mock<IItem>();
-            mockedItem.Setup(foo => foo.ServerItem).Returns("$/this/is/a/long/path/Modules.Foundations_VersionInformation.xml");
+            mockedItem.Setup(foo => foo.ServerItem).Returns("$/this/is/a/long/path/Modules.Foundations_ReferenceVersions.xml");
             var sut = new VersionInfo(mockedItem.Object);
             StringAssert.AreEqualIgnoringCase("Foundations", sut.ScpName, "Unexpected result of ScpName.");
         }
