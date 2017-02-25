@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using tfsaccess;
+using juba.tfs.wrappers;
+using juba.tfs.interfaces;
 
 namespace fixtrax_utest
 {
@@ -53,7 +54,7 @@ namespace fixtrax_utest
             var dItem = new Mock<IItem>();
             dItem.Setup(foo => foo.IsBranch).Returns(false);
             dItem.Setup(foo => foo.ServerItem).Returns("$/a/b/c/d");
-            var vcs = new Mock<IVersionControlServer>();
+            var vcs = new Mock<IExtendedVersionControlServer>();
             vcs.Setup(foo => foo.GetItem("$/a/b/c/d")).Returns(dItem.Object);
             vcs.Setup(foo => foo.GetItem("$/a/b/c")).Returns(cItem.Object);
             vcs.Setup(foo => foo.GetItem("$/a/b")).Returns(bItem.Object);

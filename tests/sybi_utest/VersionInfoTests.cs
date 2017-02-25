@@ -4,7 +4,8 @@ using sybi;
 using System;
 using System.IO;
 using System.Text;
-using tfsaccess;
+using juba.tfs.interfaces;
+using juba.tfs.wrappers;
 
 namespace sybi_utest
 {

@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace tfsaccess
+namespace juba.tfs.wrappers
 {
-    public class TFSAccessException : Exception
+    public class TfsAccessException : Exception
     {
-        public TFSAccessException(string fmt, params object[] args)
+        public TfsAccessException(string fmt, params object[] args)
             : base(string.Format(fmt, args))
         {
         }

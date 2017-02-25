@@ -1,21 +1,10 @@
-﻿using Microsoft.TeamFoundation.VersionControl.Client;
+﻿using juba.tfs.interfaces;
+using Microsoft.TeamFoundation.VersionControl.Client;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace tfsaccess
+namespace juba.tfs.wrappers
 {
-    public interface IItem
-    {
-        string ServerItem { get; }
-        bool IsBranch { get; }
-        int ChangesetId { get; }
-        DateTime CheckinDate { get; }
-        Stream DownloadFile();
-    }
     public class ItemWrapper : IItem
     {
         private Item item;
@@ -23,7 +12,7 @@ namespace tfsaccess
         {
             get
             {
-                if (item == null) throw new TFSAccessException("Not initialized object of type Item.");
+                if (item == null) throw new TfsAccessException("Not initialized object of type Item.");
                 return item;
             }
             set { item = value; }

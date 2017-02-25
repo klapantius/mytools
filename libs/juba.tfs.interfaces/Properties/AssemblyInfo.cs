@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("juba.tfs.wrappers")]
+[assembly: AssemblyTitle("juba.tfs.interfaces")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("juba.tfs.wrappers")]
+[assembly: AssemblyProduct("juba.tfs.interfaces")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("d6d3eb17-3e92-4929-9933-af24dea396bf")]
+[assembly: Guid("9875f26e-4737-4b65-96e5-1d733f983812")]
 
 // Version information for an assembly consists of the following four values:
 //

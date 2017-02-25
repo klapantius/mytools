@@ -1,10 +1,6 @@
-﻿using System;
+﻿using juba.tfs.interfaces;
+using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using tfsaccess;
 
 namespace sybi
 {
@@ -26,7 +22,7 @@ namespace sybi
         {
             get
             {
-                //var versionInfoItems = TFSAccess.VCS.GetItems(Path.Combine(scpPath, branchPath, TFSAccess.Configuration.VersionInfoPath));
+                //var versionInfoItems = juba.tfs.wrappers.VCS.GetItems(Path.Combine(scpPath, branchPath, juba.tfs.wrappers.Configuration.VersionInfoPath));
                 throw new NotImplementedException();
             }
         }

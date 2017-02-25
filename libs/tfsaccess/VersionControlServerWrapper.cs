@@ -1,31 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using juba.tfs.interfaces;
 using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.VersionControl.Client;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace tfsaccess
+namespace juba.tfs.wrappers
 {
-    public interface IVersionControlServer
-    {
-        IChangeset GetChangeset(int id);
-        IItem GetItem(string path);
-        IItemSet GetItems(string path);
-        IEnumerable<IChangeset> QueryHistory(string item, RecursionType recursion, int maxResults);
-        IEnumerable<IChangeset> QueryHistory(QueryHistoryParameters qhp);
-        VersionControlArtifactProvider ArtifactProvider { get; }
-    }
-
-    public class VersionControlServerWrapper : IVersionControlServer
+    public class VersionControlServerWrapper : IExtendedVersionControlServer
     {
         private VersionControlServer vcs;
         private VersionControlServer VCS
         {
             get
             {
-                if (vcs == null) throw new TFSAccessException("VersionControlServer object is not initialized.");
+                if (vcs == null) throw new TfsAccessException("VersionControlServer object is not initialized.");
                 return vcs;
             }
         }
@@ -66,8 +55,9 @@ namespace tfsaccess
             return VCS.QueryHistory(qhp).Select(c => new ChangesetWrapper(c));
         }
 
-        public VersionControlArtifactProvider ArtifactProvider { get { return VCS.ArtifactProvider; } }
+        public IChangeset ArtifactProviderGetChangeset(Uri artifactUri) { return new ChangesetWrapper(VCS.ArtifactProvider.GetChangeset(artifactUri)); }
 
+ 
     }
 
 }

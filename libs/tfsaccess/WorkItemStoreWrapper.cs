@@ -1,18 +1,10 @@
-﻿using Microsoft.TeamFoundation.Client;
+﻿using juba.tfs.interfaces;
+using Microsoft.TeamFoundation.Client;
 using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace tfsaccess
+namespace juba.tfs.wrappers
 {
-    public interface IWorkItemStore
-    {
-        IWorkItem GetWorkItem(int id);
-    }
-
     public class WorkItemStoreWrapper : IWorkItemStore
     {
         private WorkItemStore wis;
@@ -20,7 +12,7 @@ namespace tfsaccess
         {
             get
             {
-                if (wis == null) throw new TFSAccessException("WorkItemStore object is not initialized.");
+                if (wis == null) throw new TfsAccessException("WorkItemStore object is not initialized.");
                 return wis;
             }
         }
@@ -30,7 +22,7 @@ namespace tfsaccess
             wis = server.GetService<WorkItemStore>();
         }
 
-        public IWorkItem GetWorkItem(int id) { return new WorkItemWrapper(WIS.GetWorkItem(id)); }
+        public IExtendedWorkItem GetWorkItem(int id) { return new WorkItemWrapper(WIS.GetWorkItem(id)); }
 
     }
 }

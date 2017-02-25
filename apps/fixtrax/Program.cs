@@ -1,17 +1,12 @@
-﻿﻿using System.Diagnostics;
-﻿using System.IO;
-
-﻿using consoleapp;
-
-﻿using Microsoft.TeamFoundation;
+﻿﻿using consoleapp;
+using juba.tfs.interfaces;
+using juba.tfs.wrappers;
 using Microsoft.TeamFoundation.VersionControl.Client;
-using Microsoft.TeamFoundation.WorkItemTracking.Client;
 using System;
-using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
-using tfsaccess;
 using CmdLine = consoleapp.CmdLine;
 
 [assembly: InternalsVisibleTo("fixtrax_utest")]
@@ -100,7 +95,7 @@ namespace fixtrax
       Out.Log("called TrackWorkitem({0}, {1})", workitem, dsName);
       var wi = WIS.GetWorkItem(workitem);
       Console.WriteLine(wi.ToString());
-      foreach (var cs in GetLinkedChangesetsOf(wi).ToList())
+      foreach (var cs in wi.LinkedChangesets(vcs).ToList())
       {
         TrackCS(cs.ChangesetId, dsName);
       }
@@ -271,27 +266,8 @@ namespace fixtrax
       return path.Substring(0, path.Trim('/').LastIndexOf('/')).Trim('/');
     }
 
-    internal IEnumerable<IChangeset> GetLinkedChangesetsOf(IWorkItem wi)
-    {
-      var result = new List<ChangesetWrapper>();
-      foreach (Link link in wi.Links)
-      {
-        ExternalLink extLink = link as ExternalLink;
-        if (extLink != null)
-        {
-          ArtifactId artifact = LinkingUtilities.DecodeUri(extLink.LinkedArtifactUri);
-          if (String.Equals(artifact.ArtifactType, "Changeset", StringComparison.Ordinal))
-          {
-            // Convert the artifact URI to Changeset object.
-            result.Add(new ChangesetWrapper(VCS.ArtifactProvider.GetChangeset(new Uri(extLink.LinkedArtifactUri))));
-          }
-        }
-      }
-      return result;
-    }
-
-    private IVersionControlServer vcs;
-    internal IVersionControlServer VCS
+    private IExtendedVersionControlServer vcs;
+    internal IExtendedVersionControlServer VCS
     {
       get
       {

@@ -1,19 +1,10 @@
-﻿using Microsoft.TeamFoundation.VersionControl.Client;
-using Microsoft.TeamFoundation.WorkItemTracking.Client;
+﻿using juba.tfs.interfaces;
+using Microsoft.TeamFoundation.VersionControl.Client;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace tfsaccess
+namespace juba.tfs.wrappers
 {
-    public interface IChangeset {
-        IChange[] Changes { get; }
-        DateTime CreationDate { get; }
-        int ChangesetId { get; }
-        IWorkItem[] WorkItems { get; }
-    }
     public class ChangesetWrapper : IChangeset
     {
         private Changeset cs;
@@ -21,7 +12,7 @@ namespace tfsaccess
         {
             get
             {
-                if (cs == null) throw new TFSAccessException("Not initialized object of type Changeset.");
+                if (cs == null) throw new TfsAccessException("Not initialized object of type Changeset.");
                 return cs;
             }
             set { cs = value; }

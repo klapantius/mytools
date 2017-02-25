@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Xml.Linq;
-using tfsaccess;
+using juba.tfs.interfaces;
 
 namespace sybi
 {

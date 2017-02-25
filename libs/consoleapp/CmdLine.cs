@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 
 namespace consoleapp.CmdLine
 {
-  [assembly: InternalsVisibleTo("CmdLine_uTest")]
   public class Interpreter
   {
     private readonly List<Parameter> parameters = new List<Parameter>();

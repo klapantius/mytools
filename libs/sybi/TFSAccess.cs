@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using tfsaccess;
+﻿using juba.tfs.interfaces;
+using juba.tfs.wrappers;
+using System;
 
 namespace sybi
 {
-    public static class TFSAccess
+    public static class TfsAccess
     {
         private static IVersionControlServer myVCS;
         public static IVersionControlServer VCS

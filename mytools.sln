@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fixtrax", "apps\fixtrax\fix
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "push", "apps\pusher\push.csproj", "{4EDB76BA-B230-42A9-B817-91AD5F21FA79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tfsaccess", "libs\tfsaccess\tfsaccess.csproj", "{7F76A28E-BA50-42B1-BBA4-88A83D2732E0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "juba.tfs.wrappers", "libs\tfsaccess\juba.tfs.wrappers.csproj", "{7F76A28E-BA50-42B1-BBA4-88A83D2732E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fixtrax_utest", "tests\fixtrax_utest\fixtrax_utest.csproj", "{ACC0C293-0F42-4B58-A801-21746B378003}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sybi", "libs\sybi\sybi.csproj", "{4E8335D6-7C57-4D4D-8814-2211D01AD52E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sybi_utest", "tests\sybi_utest\sybi_utest.csproj", "{1F18A634-E2D7-49DA-88AA-A5BABB115ED4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "juba.tfs.interfaces", "libs\juba.tfs.interfaces\juba.tfs.interfaces.csproj", "{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +64,10 @@ Global
 		{1F18A634-E2D7-49DA-88AA-A5BABB115ED4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F18A634-E2D7-49DA-88AA-A5BABB115ED4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F18A634-E2D7-49DA-88AA-A5BABB115ED4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,5 +81,6 @@ Global
 		{ABD05C3D-6E81-4724-92F3-61BACA03E216} = {1AD8466B-90EE-4879-A490-5C4FA4828A87}
 		{4E8335D6-7C57-4D4D-8814-2211D01AD52E} = {AD133506-A9BD-42EE-8EE5-A7347FEBA4D2}
 		{1F18A634-E2D7-49DA-88AA-A5BABB115ED4} = {1AD8466B-90EE-4879-A490-5C4FA4828A87}
+		{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC} = {AD133506-A9BD-42EE-8EE5-A7347FEBA4D2}
 	EndGlobalSection
 EndGlobal

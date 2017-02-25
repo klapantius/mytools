@@ -62,9 +62,13 @@
       <Project>{f88393e4-b25c-4a31-bfb8-471d348dc38e}</Project>
       <Name>fixtrax</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\libs\tfsaccess\tfsaccess.csproj">
+    <ProjectReference Include="..\..\libs\juba.tfs.interfaces\juba.tfs.interfaces.csproj">
+      <Project>{d5f63ce0-82c6-4ab4-82ff-e6fd507c3ecc}</Project>
+      <Name>juba.tfs.interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\libs\tfsaccess\juba.tfs.wrappers.csproj">
       <Project>{7f76a28e-ba50-42b1-bba4-88a83d2732e0}</Project>
-      <Name>tfsaccess</Name>
+      <Name>juba.tfs.wrappers</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,16 +1,8 @@
-﻿using Microsoft.TeamFoundation.VersionControl.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using juba.tfs.interfaces;
+using Microsoft.TeamFoundation.VersionControl.Client;
 
-namespace tfsaccess
+namespace juba.tfs.wrappers
 {
-    public interface IChange
-    {
-        IItem Item { get; }
-    }
     public class ChangeWrapper : IChange
     {
         private Change ch;
@@ -18,7 +10,7 @@ namespace tfsaccess
         {
             get
             {
-                if (ch == null) throw new TFSAccessException("Not initialized object of type Change.");
+                if (ch == null) throw new TfsAccessException("Not initialized object of type Change.");
                 return ch;
             }
             set { ch = value; }
