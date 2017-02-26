@@ -1,4 +1,5 @@
 ﻿using Microsoft.TeamFoundation.VersionControl.Client;
+using System;
 using System.Collections.Generic;
 
 namespace juba.tfs.interfaces
@@ -8,8 +9,8 @@ namespace juba.tfs.interfaces
         IChangeset GetChangeset(int id);
         IItem GetItem(string path);
         IItemSet GetItems(string path);
-        IEnumerable<IChangeset> QueryHistory(string item, RecursionType recursion, int maxResults);
-        IEnumerable<IChangeset> QueryHistory(QueryHistoryParameters qhp);
+        IEnumerable<IChangeset> QueryHistory(string itemSpec, bool fullRecursion, bool sortAscending, DateTime dateVersionStart, bool includeChanges);
+        IEnumerable<IChangeset> QueryHistory(string itemSpec, bool fullRecursion, bool sortAscending, IChangeset changeSet, bool includeChanges);
     }
 
 }

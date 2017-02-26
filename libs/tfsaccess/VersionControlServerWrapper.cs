@@ -40,24 +40,29 @@ namespace juba.tfs.wrappers
             return new ItemSetWrapper(VCS.GetItems(new ItemSpec(path, RecursionType.None), VersionSpec.Latest, DeletedState.NonDeleted, ItemType.Any, GetItemsOptions.IncludeBranchInfo));
         }
 
-        public IEnumerable<IChangeset> QueryHistory(string item, RecursionType recursion, int maxResults)
+        public IChangeset ArtifactProviderGetChangeset(Uri artifactUri) { return new ChangesetWrapper(VCS.ArtifactProvider.GetChangeset(artifactUri)); }
+
+        public IEnumerable<IChangeset> QueryHistory(string itemSpec, bool fullRecursion, bool sortAscending, DateTime dateVersionStart, bool includeChanges)
         {
-            var qhp = new QueryHistoryParameters(item, recursion)
+            var qhp = new QueryHistoryParameters(itemSpec, fullRecursion ? RecursionType.Full : RecursionType.None)
             {
-                MaxResults = maxResults,
-                IncludeChanges = true
+                SortAscending = sortAscending,
+                IncludeChanges = includeChanges,
+                VersionStart = new DateVersionSpec(dateVersionStart)
             };
             return VCS.QueryHistory(qhp).Select(c => new ChangesetWrapper(c));
         }
 
-        public IEnumerable<IChangeset> QueryHistory(QueryHistoryParameters qhp)
+        public IEnumerable<IChangeset> QueryHistory(string itemSpec, bool fullRecursion, bool sortAscending, IChangeset changeSet, bool includeChanges)
         {
+            var qhp = new QueryHistoryParameters(itemSpec, fullRecursion ? RecursionType.Full : RecursionType.None)
+            {
+                SortAscending = sortAscending,
+                IncludeChanges = includeChanges,
+                VersionStart = new ChangesetVersionSpec(changeSet.ChangesetId)
+            };
             return VCS.QueryHistory(qhp).Select(c => new ChangesetWrapper(c));
         }
-
-        public IChangeset ArtifactProviderGetChangeset(Uri artifactUri) { return new ChangesetWrapper(VCS.ArtifactProvider.GetChangeset(artifactUri)); }
-
- 
     }
 
 }
