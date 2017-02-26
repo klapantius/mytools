@@ -5,7 +5,6 @@ namespace juba.tfs.interfaces
     public interface IWorkItem
     {
         int Id { get; }
-        LinkCollection Links { get; }
     }
 
 }

@@ -23,8 +23,6 @@ namespace juba.tfs.wrappers
             WI = workitem;
         }
 
-        public LinkCollection Links { get { return WI.Links; } }
-
         public int Id { get { return WI.Id; } }
 
         public override string ToString()
