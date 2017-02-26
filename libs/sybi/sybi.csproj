@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Branch.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="IVersionInfo.cs" />
     <Compile Include="SourceControlProject.cs" />
     <Compile Include="TFSAccess.cs" />
     <Compile Include="VersionInfo.cs" />

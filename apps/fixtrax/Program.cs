@@ -1,6 +1,7 @@
 ﻿﻿using juba.consoleapp;
 using juba.tfs.interfaces;
 using juba.tfs.wrappers;
+using SimpleInjector;
 using System;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace fixtrax
 {
     internal class Program
     {
+        internal static Container IoC { get; private set; }
+
         private static void Main(string[] args)
         {
             var tracker = new FixTrax();
@@ -29,6 +32,11 @@ namespace fixtrax
                 return;
             }
             Out.VerbosityLevel = bool.Parse(i.ValueOf("verbose")) ? 1 : 0;
+
+            IoC = new Container();
+            IoC.Register<Uri>(() => new Uri("xy"), Lifestyle.Singleton);
+            IoC.Register<IExtendedVersionControlServer, VersionControlServerWrapper>(Lifestyle.Singleton);
+            IoC.Register<IWorkItemStore, WorkItemStoreWrapper(Lifestyle.Singleton);
 
             try
             {
@@ -111,15 +119,15 @@ namespace fixtrax
         }
 
         public void TrackModuleChanges(string moduleBranch, int days, string dsName)
-    {
-      // load history of the module for the specified number of days
-      VCS.QueryHistory(string.Join("/", ModulesRootPath, moduleBranch), true, true, DateTime.Today - TimeSpan.FromDays(days), false)
-          .ToList()
-          .ForEach(c =>
-          {
-            if (c.WorkItems.Any()) TrackCS(c.ChangesetId, dsName);
-          });
-    }
+        {
+            // load history of the module for the specified number of days
+            VCS.QueryHistory(string.Join("/", ModulesRootPath, moduleBranch), true, true, DateTime.Today - TimeSpan.FromDays(days), false)
+                .ToList()
+                .ForEach(c =>
+                {
+                    if (c.WorkItems.Any()) TrackCS(c.ChangesetId, dsName);
+                });
+        }
 
         public void TrackCS(int csid, string dsName)
         {
@@ -257,7 +265,7 @@ namespace fixtrax
         {
             get
             {
-                if (vcs == null) vcs = new VersionControlServerWrapper(new Uri(ServerUri));
+                if (vcs == null) vcs = Program.IoC.GetInstance<IVersionControlServer>();
                 return vcs;
             }
             set { vcs = value; }
@@ -268,7 +276,7 @@ namespace fixtrax
         {
             get
             {
-                if (wis == null) wis = new WorkItemStoreWrapper(new Uri(ServerUri));
+                if (wis == null) wis = Program.IoC.GetInstance<IWorkItemStore>();
                 return wis;
             }
         }

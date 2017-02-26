@@ -4,12 +4,7 @@ using juba.tfs.interfaces;
 
 namespace sybi
 {
-    public interface IVersionInfo
-    {
-        string ScpName { get; }
-        string Version { get; }
-    }
-    public class VersionInfo
+    public class VersionInfo : sybi.IVersionInfo
     {
         private IItem myItem;
         private string scpName;
