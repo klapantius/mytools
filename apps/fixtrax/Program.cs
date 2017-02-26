@@ -4,11 +4,9 @@ using juba.tfs.wrappers;
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 using CmdLine = consoleapp.CmdLine;
 
-[assembly: InternalsVisibleTo("fixtrax_utest")]
 namespace fixtrax
 {
     internal class Program
