@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
-namespace consoleapp.CmdLine
+namespace juba.consoleapp.CmdLine
 {
   public class Interpreter
   {

@@ -7,8 +7,8 @@
     <ProjectGuid>{57B98BD1-463F-46B7-8EC2-33A6169A41F8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>consoleapp</RootNamespace>
-    <AssemblyName>consoleapp</AssemblyName>
+    <RootNamespace>juba.consoleapp</RootNamespace>
+    <AssemblyName>juba.consoleapp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

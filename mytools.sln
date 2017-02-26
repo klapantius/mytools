@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "juba.tfs.wrappers", "libs\t
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fixtrax_utest", "tests\fixtrax_utest\fixtrax_utest.csproj", "{ACC0C293-0F42-4B58-A801-21746B378003}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "consoleapp", "libs\consoleapp\consoleapp.csproj", "{57B98BD1-463F-46B7-8EC2-33A6169A41F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "juba.consoleapp", "libs\consoleapp\juba.consoleapp.csproj", "{57B98BD1-463F-46B7-8EC2-33A6169A41F8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CmdLine_uTest", "tests\CmdLine_uTest\CmdLine_uTest.csproj", "{ABD05C3D-6E81-4724-92F3-61BACA03E216}"
 EndProject

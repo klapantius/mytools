@@ -1,11 +1,11 @@
-﻿﻿using consoleapp;
+﻿﻿using juba.consoleapp;
 using juba.tfs.interfaces;
 using juba.tfs.wrappers;
 using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using CmdLine = consoleapp.CmdLine;
+using CmdLine = juba.consoleapp.CmdLine;
 
 namespace fixtrax
 {

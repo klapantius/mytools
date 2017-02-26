@@ -47,9 +47,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\consoleapp\consoleapp.csproj">
+    <ProjectReference Include="..\consoleapp\juba.consoleapp.csproj">
       <Project>{57b98bd1-463f-46b7-8ec2-33a6169a41f8}</Project>
-      <Name>consoleapp</Name>
+      <Name>juba.consoleapp</Name>
     </ProjectReference>
     <ProjectReference Include="..\juba.tfs.interfaces\juba.tfs.interfaces.csproj">
       <Project>{d5f63ce0-82c6-4ab4-82ff-e6fd507c3ecc}</Project>

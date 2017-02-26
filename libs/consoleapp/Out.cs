@@ -1,7 +1,7 @@
 using System;
 
 
-namespace consoleapp
+namespace juba.consoleapp
 {
   public static class Out
   {
