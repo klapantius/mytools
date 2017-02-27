@@ -12,7 +12,7 @@ namespace juba.consoleapp.CmdLine
     public string ValueOf(string paramName)
     {
       var asked = parameters.FirstOrDefault(p => p.Matches(paramName));
-      return asked != null ? asked.Value : string.Empty;
+      return asked != null && asked.Value != Parameter.InvalidValue ? asked.Value : string.Empty;
     }
 
     public string ValueOf(string paramName, Func<bool, string> validation)

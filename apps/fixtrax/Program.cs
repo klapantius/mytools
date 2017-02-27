@@ -34,7 +34,7 @@ namespace fixtrax
             Out.VerbosityLevel = bool.Parse(i.ValueOf("verbose")) ? 1 : 0;
 
             IoC = new Container();
-            IoC.Register<Uri>(() => new Uri("xy"), Lifestyle.Singleton);
+            IoC.Register(() => new Uri("https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"), Lifestyle.Singleton);
             IoC.Register<IExtendedVersionControlServer, VersionControlServerWrapper>(Lifestyle.Singleton);
             IoC.Register<IWorkItemStore, WorkItemStoreWrapper>(Lifestyle.Singleton);
 
@@ -100,7 +100,7 @@ namespace fixtrax
             Out.Log("called TrackWorkitem({0}, {1})", workitem, dsName);
             var wi = WIS.GetWorkItem(workitem);
             Console.WriteLine(wi.ToString());
-            foreach (var cs in wi.LinkedChangesets(vcs).ToList())
+            foreach (var cs in wi.LinkedChangesets(VCS).ToList())
             {
                 TrackCS(cs.ChangesetId, dsName);
             }
