@@ -36,7 +36,7 @@ namespace fixtrax
             IoC = new Container();
             IoC.Register<Uri>(() => new Uri("xy"), Lifestyle.Singleton);
             IoC.Register<IExtendedVersionControlServer, VersionControlServerWrapper>(Lifestyle.Singleton);
-            IoC.Register<IWorkItemStore, WorkItemStoreWrapper(Lifestyle.Singleton);
+            IoC.Register<IWorkItemStore, WorkItemStoreWrapper>(Lifestyle.Singleton);
 
             try
             {
@@ -265,7 +265,7 @@ namespace fixtrax
         {
             get
             {
-                if (vcs == null) vcs = Program.IoC.GetInstance<IVersionControlServer>();
+                if (vcs == null) vcs = Program.IoC.GetInstance<IExtendedVersionControlServer>();
                 return vcs;
             }
             set { vcs = value; }
