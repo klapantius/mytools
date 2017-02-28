@@ -16,8 +16,6 @@ namespace fixtrax
 
         private static void Main(string[] args)
         {
-            var tracker = new FixTrax();
-
             var i = new CmdLine.Interpreter();
             i.Add(new CmdLine.Parameter(new[] { "changeset", "cs" }, "changeset to track", false));
             i.Add(new CmdLine.Parameter(new[] { "module", "mb" }, "module branch to find changes (e.G. Core/PCP/v4) on it", false));
@@ -37,6 +35,9 @@ namespace fixtrax
             IoC.Register(() => new Uri("https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"), Lifestyle.Singleton);
             IoC.Register<IExtendedVersionControlServer, VersionControlServerWrapper>(Lifestyle.Singleton);
             IoC.Register<IWorkItemStore, WorkItemStoreWrapper>(Lifestyle.Singleton);
+            IoC.Register<FixTrax>();
+
+            var tracker = IoC.GetInstance<FixTrax>();
 
             try
             {
