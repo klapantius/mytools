@@ -1,46 +1,49 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Xml.Linq;
 using juba.tfs.interfaces;
 
 namespace sybi
 {
-    public class VersionInfo : sybi.IVersionInfo
+    public class VersionInfo : IVersionInfo
     {
-        private IItem myItem;
-        private string scpName;
-        public string ScpName
+        private string myID;
+        public string Id
         {
             get
             {
-                if (string.IsNullOrEmpty(scpName))
+                if (string.IsNullOrEmpty(myID))
                 {
-                    var fname = myItem.ServerItem.Split('/').Last().Split('.').FirstOrDefault(x => x.Contains(Configuration.Data.VersionFileNameConstantPart));
-                    if (!string.IsNullOrEmpty(fname)) scpName = fname.Replace(Configuration.Data.VersionFileNameConstantPart, "");
-                } return scpName;
-            }
-            internal set { scpName = value; }
-        }
-
-        private string version;
-        public string Version
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(version))
-                {
-                    var xd = XDocument.Load(myItem.DownloadFile());
-                    version = xd
+                    if (Item == null) return string.Empty;
+                    var xd = XDocument.Load(Item.DownloadFile());
+                    myID = xd
                         .Descendants().ToList()
                         .First(d => d.Name.LocalName == Configuration.Data.VersionNodeName)
                         .Value;
                 }
-                return version;
+                return myID;
             }
-            internal set { version = value; }
+            internal set { myID = value; }
         }
+
+        public IItem Item { get; private set; }
+
         public VersionInfo(IItem item)
         {
-            myItem = item;
+            Item = item;
         }
+
+        public VersionInfo() { }
+
+        public string VersionFolder
+        {
+            get { return Item.ServerItem.Substring(0, Item.ServerItem.LastIndexOf('/')); }
+        }
+
+        public string VersionFile
+        {
+            get { return Item.ServerItem.Substring(Item.ServerItem.LastIndexOf('/') + 1); }
+        }
+
     }
 }

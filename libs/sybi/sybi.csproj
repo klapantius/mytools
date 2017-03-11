@@ -40,12 +40,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Branch.cs" />
+    <Compile Include="BranchFinder.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="IBranch.cs" />
+    <Compile Include="IBranchFinder.cs" />
+    <Compile Include="ISourceControlProjectFinder.cs" />
+    <Compile Include="IVersionInfoFinder.cs" />
     <Compile Include="IVersionInfo.cs" />
+    <Compile Include="PathAndFilenameConventions.cs" />
     <Compile Include="SourceControlProject.cs" />
+    <Compile Include="SourceControlProjectFinder.cs" />
+    <Compile Include="SybiException.cs" />
     <Compile Include="TFSAccess.cs" />
     <Compile Include="VersionInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VersionInfoFinder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\consoleapp\juba.consoleapp.csproj">

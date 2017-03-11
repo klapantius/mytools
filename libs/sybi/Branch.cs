@@ -1,22 +1,19 @@
-﻿using juba.tfs.interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace sybi
 {
-    public interface IBranch
-    {
-        IEnumerable<IVersionInfo> LatestVersionInfo { get; }
-    }
     public class Branch : IBranch
     {
         private string myBranchPath;
-        private string myScpPath;
-        public string Error { get; internal set; }
-        public Branch(string scpPath, string branchPath)
+        public Branch(string path)
         {
-            myScpPath = scpPath;
-            myBranchPath = branchPath;
+            myBranchPath = path;
+        }
+
+        public string Path
+        {
+            get { return myBranchPath; }
         }
 
         public IEnumerable<IVersionInfo> LatestVersionInfo
@@ -27,5 +24,6 @@ namespace sybi
                 throw new NotImplementedException();
             }
         }
+
     }
 }

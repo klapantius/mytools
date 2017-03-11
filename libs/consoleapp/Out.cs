@@ -7,6 +7,7 @@ namespace juba.consoleapp
   {
     public static int VerbosityLevel = 0;
     public static void Log(string fmt, params object[] args) { if (VerbosityLevel > 0) Print(ConsoleColor.DarkGray, fmt, args); }
+    public static void Error(string fmt, params object[] args) { Print(ConsoleColor.Red, fmt, args); }
 
     private static void Print(ConsoleColor color, string fmt, params object[] args)
     {

@@ -1,10 +1,15 @@
 ﻿using System;
 
+using juba.tfs.interfaces;
+
+
 namespace sybi
 {
     public interface IVersionInfo
     {
-        string ScpName { get; }
-        string Version { get; }
+        string Id { get; }
+        IItem Item { get; }
+        string VersionFolder { get; }
+        string VersionFile { get; }
     }
 }

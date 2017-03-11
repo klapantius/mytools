@@ -13,15 +13,6 @@ namespace sybi_utest
     public class VersionInfoTests
     {
         [Test]
-        public void ScpNameCanBeExtractedFromItemInformation()
-        {
-            var mockedItem = new Mock<IItem>();
-            mockedItem.Setup(foo => foo.ServerItem).Returns("$/this/is/a/long/path/Modules.Foundations_ReferenceVersions.xml");
-            var sut = new VersionInfo(mockedItem.Object);
-            StringAssert.AreEqualIgnoringCase("Foundations", sut.ScpName, "Unexpected result of ScpName.");
-        }
-
-        [Test]
         public void VersionCanBeExtractedFromItemInformation()
         {
             var xmlString = 
@@ -49,7 +40,7 @@ namespace sybi_utest
             var mockedItem = new Mock<IItem>();
             mockedItem.Setup(foo => foo.DownloadFile()).Returns(stream);
             var sut = new VersionInfo(mockedItem.Object);
-            StringAssert.AreEqualIgnoringCase("4.8.1701.3001", sut.Version, "Unexpected result of Version.");
+            StringAssert.AreEqualIgnoringCase("4.8.1701.3001", sut.Id, "Unexpected result of Version.");
         }
     }
 }
