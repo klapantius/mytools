@@ -5,18 +5,13 @@ using SimpleInjector;
 using System;
 using System.IO;
 using System.Linq;
-
 using sybi;
-
 using CmdLine = juba.consoleapp.CmdLine;
 
 namespace fixtrax
 {
     internal class Program
     {
-        [Obsolete]
-        internal static Container IoC { get; private set; }
-
         private static void Main(string[] args)
         {
             var i = new CmdLine.Interpreter();
@@ -34,14 +29,14 @@ namespace fixtrax
             }
             Out.VerbosityLevel = bool.Parse(i.ValueOf("verbose")) ? 1 : 0;
 
-            IoC = new Container();
-            IoC.Register(() => new Uri("https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"), Lifestyle.Singleton);
-            IoC.Register<IVersionControlServer, VersionControlServerWrapper>(Lifestyle.Singleton);
-            IoC.Register<IWorkItemStore, WorkItemStoreWrapper>(Lifestyle.Singleton);
-            IoC.Register<IVersionInfoFinder, VersionInfoFinder>();
-            IoC.Register<FixTrax>();
+            var ioc = new Container();
+            ioc.Register(() => new Uri("https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"), Lifestyle.Singleton);
+            ioc.Register<IVersionControlServer, VersionControlServerWrapper>(Lifestyle.Singleton);
+            ioc.Register<IWorkItemStore, WorkItemStoreWrapper>(Lifestyle.Singleton);
+            ioc.Register<IVersionInfoFinder, VersionInfoFinder>();
+            ioc.Register<FixTrax>();
 
-            var tracker = IoC.GetInstance<FixTrax>();
+            var tracker = ioc.GetInstance<FixTrax>();
 
             try
             {
@@ -84,9 +79,10 @@ namespace fixtrax
 
     internal class FixTrax
     {
-        private readonly IVersionControlServer myVcs;
-        private readonly IWorkItemStore myWis;
-        private readonly ILinkedChangesetsExtractor myLce;
+        private readonly IVersionControlServer myVersionControlServer;
+        private readonly IWorkItemStore myWorkItemStore;
+        private readonly IVersionInfoFinder myVersionInfoFinder;
+        private readonly ILinkedChangesetsExtractor myLinkedChangesetsExtractor;
 
         #region constants
         private static readonly string ServerUri = @"https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects";
@@ -96,19 +92,20 @@ namespace fixtrax
 
         #endregion constants
 
-        public FixTrax(IVersionControlServer vcs, IWorkItemStore wis, ILinkedChangesetsExtractor lce)
+        public FixTrax(IVersionControlServer vcs, IWorkItemStore wis, IVersionInfoFinder vif, ILinkedChangesetsExtractor lce)
         {
-            myVcs = vcs;
-            myWis = wis;
-            myLce = lce;
+            myVersionControlServer = vcs;
+            myWorkItemStore = wis;
+            myVersionInfoFinder = vif;
+            myLinkedChangesetsExtractor = lce;
         }
 
         internal void TrackWorkitem(int workitem, string dsName)
         {
             Out.Log("called TrackWorkitem({0}, {1})", workitem, dsName);
-            var wi = myWis.GetWorkItem(workitem);
+            var wi = myWorkItemStore.GetWorkItem(workitem);
             Console.WriteLine(wi.ToString());
-            foreach (var cs in myLce.GetChangesets(wi).ToList())
+            foreach (var cs in myLinkedChangesetsExtractor.GetChangesets(wi).ToList())
             {
                 TrackCS(cs.ChangesetId, dsName);
             }
@@ -129,7 +126,7 @@ namespace fixtrax
         public void TrackModuleChanges(string moduleBranch, int days, string dsName)
         {
             // load history of the module for the specified number of days
-            myVcs.QueryHistory(string.Join("/", ModulesRootPath, moduleBranch), true, true, DateTime.Today - TimeSpan.FromDays(days), false)
+            myVersionControlServer.QueryHistory(string.Join("/", ModulesRootPath, moduleBranch), true, true, DateTime.Today - TimeSpan.FromDays(days), false)
                 .ToList()
                 .ForEach(c =>
                 {
@@ -139,10 +136,8 @@ namespace fixtrax
 
         public void TrackCS(int csid, string dsAndBranchName)
         {
-            var vif = Program.IoC.GetInstance<IVersionInfoFinder>();
-
             // idnetify the source control project based on the specified CS
-            var cs = myVcs.GetChangeset(csid);
+            var cs = myVersionControlServer.GetChangeset(csid);
             if (cs == null) { throw new SybiException("Could not find a changeset with Id {0}", csid); }
             var anItemOfCS = cs.Changes.First().Item.ServerItem;
             var scpFinder = new SourceControlProjectFinder();
@@ -150,7 +145,7 @@ namespace fixtrax
 
             // load history of version info file of the module
             // find next version of the module after the asked CS
-            var sourceVersion = vif.FindByChangeset(cs);
+            var sourceVersion = myVersionInfoFinder.FindByChangeset(cs);
             if (sourceVersion.Item == null)
             {
                 PrintTrackingResult(cs, sourceScp.Name, null, dsAndBranchName, null);
@@ -164,8 +159,8 @@ namespace fixtrax
 
             // load history of the DS version file
             // find next change after the module version arrived the DS
-            var dsVersion = vif.FindByChangesetId(sourceVersion.Item.ChangesetId,
-                string.Join("/", DSRootPath, dsAndBranchName, PathAndFilenameConventions.VersionInfoFolderSubpath),
+            var dsVersion = myVersionInfoFinder.FindByChangesetId(sourceVersion.Item.ChangesetId,
+                PathAndFilenameConventions.AddVersionInfoFolderSubpathTo(string.Join("/", DSRootPath, dsAndBranchName)),
                 PathAndFilenameConventions.VersionInfoFileNameOf("Deploy", dsAndBranchName.Split('/', '\\')[0]));
             if (dsVersion.Item == null)
             {
