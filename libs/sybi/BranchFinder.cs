@@ -5,9 +5,9 @@ namespace sybi
 {
     public class BranchFinder: IBranchFinder
     {
-        private readonly IExtendedVersionControlServer myVCS;
+        private readonly IVersionControlServer myVCS;
 
-        public BranchFinder(IExtendedVersionControlServer vcs)
+        public BranchFinder(IVersionControlServer vcs)
         {
             myVCS = vcs;
         }

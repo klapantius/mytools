@@ -22,7 +22,7 @@ namespace juba.tfs.wrappers
             wis = server.GetService<WorkItemStore>();
         }
 
-        public IExtendedWorkItem GetWorkItem(int id) { return new WorkItemWrapper(WIS.GetWorkItem(id)); }
+        public IWorkItem GetWorkItem(int id) { return new WorkItemWrapper(WIS.GetWorkItem(id)); }
 
     }
 }

@@ -8,9 +8,9 @@ namespace sybi
 {
     public class VersionInfoFinder : IVersionInfoFinder
     {
-        private readonly IExtendedVersionControlServer myVCS;
+        private readonly IVersionControlServer myVCS;
 
-        public VersionInfoFinder(IExtendedVersionControlServer vcs)
+        public VersionInfoFinder(IVersionControlServer vcs)
         {
             myVCS = vcs;
         }
@@ -19,9 +19,9 @@ namespace sybi
         {
             if (cs == null) return null;
 
-            // ask younger changes of the specified version information file
+            // ask younger changesets of the specified version information file
             var changesets =
-                myVCS.QueryHistory(String.Join("/", vfolder, vfile), fullRecursion: false, sortAscending: true, changeSet: cs, includeChanges: true).ToList();
+                myVCS.QueryHistory(string.Join("/", vfolder, vfile), fullRecursion: false, sortAscending: true, changeSet: cs, includeChanges: true).ToList();
             // take the first one after the specified changeset
             var versioncs = changesets.FirstOrDefault(c => c.ChangesetId > cs.ChangesetId);
             if (versioncs == null)

@@ -2,7 +2,7 @@
 {
     public interface IWorkItemStore
     {
-        IExtendedWorkItem GetWorkItem(int id);
+        IWorkItem GetWorkItem(int id);
     }
 
 }

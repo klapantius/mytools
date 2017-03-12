@@ -6,7 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 
- using sybi;
+using sybi;
 
 using CmdLine = juba.consoleapp.CmdLine;
 
@@ -14,6 +14,7 @@ namespace fixtrax
 {
     internal class Program
     {
+        [Obsolete]
         internal static Container IoC { get; private set; }
 
         private static void Main(string[] args)
@@ -35,8 +36,9 @@ namespace fixtrax
 
             IoC = new Container();
             IoC.Register(() => new Uri("https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"), Lifestyle.Singleton);
-            IoC.Register<IExtendedVersionControlServer, VersionControlServerWrapper>(Lifestyle.Singleton);
+            IoC.Register<IVersionControlServer, VersionControlServerWrapper>(Lifestyle.Singleton);
             IoC.Register<IWorkItemStore, WorkItemStoreWrapper>(Lifestyle.Singleton);
+            IoC.Register<IVersionInfoFinder, VersionInfoFinder>();
             IoC.Register<FixTrax>();
 
             var tracker = IoC.GetInstance<FixTrax>();
@@ -82,6 +84,10 @@ namespace fixtrax
 
     internal class FixTrax
     {
+        private readonly IVersionControlServer myVcs;
+        private readonly IWorkItemStore myWis;
+        private readonly ILinkedChangesetsExtractor myLce;
+
         #region constants
         private static readonly string ServerUri = @"https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects";
 
@@ -90,12 +96,19 @@ namespace fixtrax
 
         #endregion constants
 
+        public FixTrax(IVersionControlServer vcs, IWorkItemStore wis, ILinkedChangesetsExtractor lce)
+        {
+            myVcs = vcs;
+            myWis = wis;
+            myLce = lce;
+        }
+
         internal void TrackWorkitem(int workitem, string dsName)
         {
             Out.Log("called TrackWorkitem({0}, {1})", workitem, dsName);
-            var wi = WIS.GetWorkItem(workitem);
+            var wi = myWis.GetWorkItem(workitem);
             Console.WriteLine(wi.ToString());
-            foreach (var cs in wi.LinkedChangesets(VCS).ToList())
+            foreach (var cs in myLce.GetChangesets(wi).ToList())
             {
                 TrackCS(cs.ChangesetId, dsName);
             }
@@ -116,7 +129,7 @@ namespace fixtrax
         public void TrackModuleChanges(string moduleBranch, int days, string dsName)
         {
             // load history of the module for the specified number of days
-            VCS.QueryHistory(string.Join("/", ModulesRootPath, moduleBranch), true, true, DateTime.Today - TimeSpan.FromDays(days), false)
+            myVcs.QueryHistory(string.Join("/", ModulesRootPath, moduleBranch), true, true, DateTime.Today - TimeSpan.FromDays(days), false)
                 .ToList()
                 .ForEach(c =>
                 {
@@ -126,10 +139,10 @@ namespace fixtrax
 
         public void TrackCS(int csid, string dsAndBranchName)
         {
-            var vif = new VersionInfoFinder(VCS);
+            var vif = Program.IoC.GetInstance<IVersionInfoFinder>();
 
             // idnetify the source control project based on the specified CS
-            var cs = VCS.GetChangeset(csid);
+            var cs = myVcs.GetChangeset(csid);
             if (cs == null) { throw new SybiException("Could not find a changeset with Id {0}", csid); }
             var anItemOfCS = cs.Changes.First().Item.ServerItem;
             var scpFinder = new SourceControlProjectFinder();
@@ -184,16 +197,6 @@ namespace fixtrax
                 return;
             }
             Console.WriteLine("{0} {1}", dsName.Split('/', '\\')[0], dsVersion);
-        }
-
-        internal IExtendedVersionControlServer VCS
-        {
-            get { return Program.IoC.GetInstance<IExtendedVersionControlServer>(); }
-        }
-
-        internal IWorkItemStore WIS
-        {
-            get { return Program.IoC.GetInstance<IWorkItemStore>(); }
         }
 
     }

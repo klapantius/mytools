@@ -45,10 +45,9 @@
     <Compile Include="IChangeset.cs" />
     <Compile Include="IItem.cs" />
     <Compile Include="IItemSet.cs" />
+    <Compile Include="ILinkedChangesetsExtractor.cs" />
     <Compile Include="IVersionControlServer.cs" />
-    <Compile Include="IExtendedVersionControlServer.cs" />
     <Compile Include="IWorkItem.cs" />
-    <Compile Include="IExtendedWorkItem.cs" />
     <Compile Include="IWorkItemStore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace juba.tfs.wrappers
 {
-    public class VersionControlServerWrapper : IExtendedVersionControlServer
+    public class VersionControlServerWrapper : IVersionControlServer
     {
         private VersionControlServer vcs;
         private VersionControlServer VCS
@@ -39,8 +39,6 @@ namespace juba.tfs.wrappers
         {
             return new ItemSetWrapper(VCS.GetItems(new ItemSpec(path, RecursionType.None), VersionSpec.Latest, DeletedState.NonDeleted, ItemType.Any, GetItemsOptions.IncludeBranchInfo));
         }
-
-        public IChangeset ArtifactProviderGetChangeset(Uri artifactUri) { return new ChangesetWrapper(VCS.ArtifactProvider.GetChangeset(artifactUri)); }
 
         public IEnumerable<IChangeset> QueryHistory(string itemSpec, bool fullRecursion, bool sortAscending, DateTime dateVersionStart, bool includeChanges)
         {
