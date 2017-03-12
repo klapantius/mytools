@@ -27,7 +27,7 @@ namespace sybi_utest
         public MockedChangeset(int id, string[] changedFiles)
             : this(id)
         {
-            m.Setup(foo => foo.Changes).Returns(changedFiles.Select(f =>
+            Changes = changedFiles.Select(f =>
             {
                 var mockedItem = new MockedItem()
                 {
@@ -40,7 +40,7 @@ namespace sybi_utest
                     Item = mockedItem.Object
                 };
                 return mockedChange.Object;
-            }).ToArray());
+            }).ToArray();
         }
 
         public IChangeset Object { get { return m.Object; } }

@@ -9,10 +9,12 @@ namespace sybi
     public class VersionInfoFinder : IVersionInfoFinder
     {
         private readonly IVersionControlServer myVCS;
+        private readonly IBranchFinder myBranchFinder;
 
-        public VersionInfoFinder(IVersionControlServer vcs)
+        public VersionInfoFinder(IVersionControlServer vcs, IBranchFinder branchFinder)
         {
             myVCS = vcs;
+            myBranchFinder = branchFinder;
         }
 
         public IVersionInfo FindByChangeset(IChangeset cs, string vfolder, string vfile)
@@ -46,10 +48,9 @@ namespace sybi
             var anItemOfCS = cs.Changes.First().Item.ServerItem;
             var scpFinder = new SourceControlProjectFinder();
             var scp = scpFinder.Find(anItemOfCS);
-            var brFinder = new BranchFinder(myVCS);
-            var scpVersionFolder = string.Join("/", brFinder.Find(anItemOfCS).Path, PathAndFilenameConventions.VersionInfoFolderSubpath);
+            var scpVersionFolder = PathAndFilenameConventions.AddVersionInfoFolderSubpathTo(myBranchFinder.Find(anItemOfCS).Path);
             var scpType = scpVersionFolder.Split('/')[2];
-            var scpVersionFileName = string.Format(PathAndFilenameConventions.VersionInfoFilePattern, scpType, scp.Name);
+            var scpVersionFileName = string.Format(PathAndFilenameConventions.VersionInfoFileNameOf(scpType, scp.Name));
 
             return FindByChangeset(cs, scpVersionFolder, scpVersionFileName);
         }
