@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apps", "apps", "{B7426544-ED36-4E47-B6CE-43E9FF869507}"
 EndProject
@@ -26,6 +26,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sybi_utest", "tests\sybi_utest\sybi_utest.csproj", "{1F18A634-E2D7-49DA-88AA-A5BABB115ED4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "juba.tfs.interfaces", "libs\juba.tfs.interfaces\juba.tfs.interfaces.csproj", "{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testrunanalyzer", "apps\testrunanalyzer\testrunanalyzer.csproj", "{DBCDE402-D958-4823-AC57-C057DCBFBE0C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -68,6 +70,10 @@ Global
 		{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBCDE402-D958-4823-AC57-C057DCBFBE0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBCDE402-D958-4823-AC57-C057DCBFBE0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBCDE402-D958-4823-AC57-C057DCBFBE0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBCDE402-D958-4823-AC57-C057DCBFBE0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,5 +88,6 @@ Global
 		{4E8335D6-7C57-4D4D-8814-2211D01AD52E} = {AD133506-A9BD-42EE-8EE5-A7347FEBA4D2}
 		{1F18A634-E2D7-49DA-88AA-A5BABB115ED4} = {1AD8466B-90EE-4879-A490-5C4FA4828A87}
 		{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC} = {AD133506-A9BD-42EE-8EE5-A7347FEBA4D2}
+		{DBCDE402-D958-4823-AC57-C057DCBFBE0C} = {B7426544-ED36-4E47-B6CE-43E9FF869507}
 	EndGlobalSection
 EndGlobal

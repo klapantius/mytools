@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace juba.consoleapp.CmdLine
@@ -51,13 +50,14 @@ namespace juba.consoleapp.CmdLine
       return parameter;
     }
 
-    public bool Parse(string commandLine)
+    public bool Parse(params string[] inArgs)
     {
       const string ParamSeparators = "/-";
       const string ValueSeparators = ":=";
       Errors.Clear();
       const string sub = @"( [\/\-].*)";
       var pattern = @"[\/\-](.*)";
+      var commandLine = inArgs != null ? string.Join(" ", inArgs) : string.Empty;
       while (new Regex(pattern + sub).IsMatch(commandLine)) pattern += sub;
       var groups = new Regex(pattern).Match(commandLine).Groups;
       var splits = new List<string>();
