@@ -1,4 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 
 using Microsoft.TeamFoundation.Build.Client;
 using juba.consoleapp;
@@ -32,13 +38,11 @@ namespace testrunanalyzer
             Out.VerbosityLevel = bool.Parse(cmd.ValueOf("verbose")) ? 1 : 0;
 
             var ioc = new Container();
-            ioc.Register(() => new Uri(cmd.ValueOf("tpc")));
+            ioc.Register(() => new Uri(cmd.ValueOf("tpc")), Lifestyle.Singleton);
             ioc.Register<ITfsTeamProjectCollection, TfsTeamProjectCollectionWrapper>(Lifestyle.Singleton);
-            var tpc = ioc.GetInstance<ITfsTeamProjectCollection>();
-            ioc.Register(() => tpc.GetService<IBuildServer>());
-            ioc.Register<ITestManagementTeamProjectProvider>(() => new TestManagementTeamProjectProvider(tpc));
-            var tmtpp = ioc.GetInstance<ITestManagementTeamProjectProvider>();
-            ioc.Register(() => tmtpp.GeTestManagementTeamProject(cmd.ValueOf("tp")));
+            ioc.Register(() => ioc.GetInstance<ITfsTeamProjectCollection>().GetService<IBuildServer>());
+            ioc.Register<ITestManagementTeamProjectProvider, TestManagementTeamProjectProvider>();
+            ioc.Register(() => ioc.GetInstance<ITestManagementTeamProjectProvider>().GeTestManagementTeamProject(cmd.ValueOf("tp")));
             ioc.Register<TestRunAnalyzer>();
 
             var a = ioc.GetInstance<TestRunAnalyzer>();
@@ -65,18 +69,76 @@ namespace testrunanalyzer
             var spec = myBuildServer.CreateBuildDetailSpec(teamProjectName, buildDefinitionName);
             //spec.Status = BuildStatus.PartiallySucceeded | BuildStatus.Failed;
             spec.Status = (BuildStatus.All & ~BuildStatus.InProgress);
-            spec.InformationTypes = new[] { "CustomSummaryInformation", "BuildError" };
-            spec.MinFinishTime = DateTime.Now.AddDays(-5); //sinceDate;
+            spec.InformationTypes = null;
+            spec.MinFinishTime = DateTime.Now.AddDays(-1); //sinceDate;
             spec.QueryOrder = BuildQueryOrder.FinishTimeDescending;
 
-            var builds = myBuildServer.QueryBuilds(spec).Builds;
+            var data = CollectData(myBuildServer.QueryBuilds(spec).Builds);
+            Console.WriteLine("Top 10:");
+            data.OrderByDescending(i => Convert.ToInt32(i.duration.TotalMilliseconds))
+                .ToList()
+                .Take(10).ToList().ForEach(i => Out.Info("\t{0}", i));
+        }
+
+        private struct TestExecutionData
+        {
+            public string build;
+            public string assembly;
+            public TimeSpan duration;
+            public string dropFolder;
+            public override string ToString()
+            {
+                return string.Format("{0} {1} {2}", duration, assembly, dropFolder);
+            }
+        }
+
+        private List<TestExecutionData> CollectData(IBuildDetail[] builds)
+        {
+            var result = new List<TestExecutionData>();
             foreach (var buildDetail in builds)
             {
                 Out.Log(buildDetail.BuildNumber);
                 var testRuns = myTestManagementTeamProject.TestRuns.ByBuild(buildDetail.Uri);
+                foreach (var testRun in testRuns)
+                {
+                    var item= new TestExecutionData()
+                    {
+                        build = buildDetail.BuildNumber,
+                        assembly = testRun.Title.Substring(0, testRun.Title.LastIndexOf(".dll", StringComparison.InvariantCultureIgnoreCase)),
+                        duration = testRun.DateCompleted - testRun.DateStarted,
+                        dropFolder = Path.Combine(Path.GetDirectoryName(buildDetail.LogLocation), GetRelativeOutputPath(testRun)),
+                    };
+                    result.Add(item);
+                    Out.Log("\t{0} {1} {2}", item.duration, item.assembly, item.dropFolder);
+                }
             }
+            return result;
         }
 
+        private static readonly string myByteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+        private static string GetRelativeOutputPath(ITestRun testRun)
+        {
+            var x = testRun.Attachments.FirstOrDefault(foo => foo.AttachmentType == "TmiTestRunSummary");
+            if (x == null) return string.Empty;
+            
+            var array = new byte[99999999];
+            x.DownloadToArray(array, 0);
+            var txt = Encoding.UTF8.GetString(array).TrimEnd('\0');
+            if (txt.StartsWith(myByteOrderMarkUtf8))
+            {
+                txt = txt.Remove(0, myByteOrderMarkUtf8.Length);
+            }
+            var d = XDocument.Parse(txt);
+            if (d.Root == null) return string.Empty;
+            
+            var node = d.Descendants()
+                .FirstOrDefault(foo => foo.Attributes()
+                    .Any(a => a.Name.LocalName == "name" && a.Value == "RelativeOutputPath"));
+            if (node == null) return string.Empty;
+
+            var attr = node.Attributes().FirstOrDefault(foo => foo.Name.LocalName == "value");
+            return attr == null ? string.Empty : attr.Value;
+        }
     }
 
 }
