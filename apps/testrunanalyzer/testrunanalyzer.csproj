@@ -50,6 +50,9 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestExecutionAnalyzer.cs" />
+    <Compile Include="TestExecutionData.cs" />
+    <Compile Include="TestExecutionDataCollector.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

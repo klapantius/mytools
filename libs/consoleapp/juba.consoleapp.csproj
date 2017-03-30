@@ -39,8 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CmdLine.cs" />
+    <Compile Include="CmdLine\CmdLine.cs" />
+    <Compile Include="CmdLine\ICmdLineParameter.cs" />
+    <Compile Include="CmdLine\Parameter.cs" />
     <Compile Include="ExceptionBase.cs" />
+    <Compile Include="CmdLine\ICmdLineInterpreter.cs" />
     <Compile Include="Out.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
