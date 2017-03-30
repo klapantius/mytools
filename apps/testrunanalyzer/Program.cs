@@ -43,7 +43,8 @@ namespace testrunanalyzer
                         (x) => { if (x <= 0) throw new Exception("The specified number of days is not valid"); }));
 
             })).Requires("build");
-            cmd.Add(new Command(new []{"Iam"}, "greeting", () => Out.Info("hello {0}", cmd.ValueOf("iam")))).Requires("iam");
+            cmd.Add(new Parameter(new[] {"Iam"}, "a name", false));
+            cmd.Add(new Command(new []{"hello"}, "greeting", () => Out.Info("hello {0}", cmd.ValueOf("iam")))).Requires("iam");
 
             if (!cmd.Parse(args))
             {

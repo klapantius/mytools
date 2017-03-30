@@ -7,8 +7,10 @@ namespace juba.consoleapp.CmdLine
 {
     public class Interpreter : ICmdLineInterpreter
     {
-        private readonly List<ICmdLineCommand> myCommands= new List<ICmdLineCommand>();
+        private readonly List<ICmdLineCommand> myCommands = new List<ICmdLineCommand>();
         private readonly List<ICmdLineParameter> myParameters = new List<ICmdLineParameter>();
+        private List<ICmdLineItem> AllKnownItems { get { return myCommands.Cast<ICmdLineItem>().Union(myParameters).ToList(); } }
+        private List<ICmdLineCommand> SpecifiedCommands { get; set; }
 
         public string ValueOf(string paramName)
         {
@@ -44,9 +46,9 @@ namespace juba.consoleapp.CmdLine
             return result;
         }
 
-        public bool IsSpecified(string paramName)
+        public bool IsSpecified(string itemName)
         {
-            return !string.IsNullOrEmpty(ValueOf(paramName));
+            return !string.IsNullOrEmpty(ValueOf(itemName));
         }
 
         public ICmdLineParameter Add(ICmdLineParameter parameter)
@@ -68,7 +70,7 @@ namespace juba.consoleapp.CmdLine
             myCommands.Add(comamnd);
             return comamnd;
         }
-        
+
         public bool Parse(params string[] inArgs)
         {
             const string ItemSeparators = "/-";
@@ -87,13 +89,21 @@ namespace juba.consoleapp.CmdLine
                 .ToDictionary(a => a[0].ToLower().Trim('/', '-'), a => a.Count() > 1 ? a[1] : "true");
             foreach (var a in args)
             {
-                var parameter = myParameters.FirstOrDefault(p => p.Matches(a.Key));
-                if (parameter == null)
+                if (!AllKnownItems.Any(p => p.Matches(a.Key)))
                 {
-                    Errors.Add(string.Format("Not supported parameter: \"{0}\"", a.Key));
+                    Errors.Add(string.Format("Not supported entity: \"{0}\"", a.Key));
+                }
+            }
+            SpecifiedCommands = new List<ICmdLineCommand>();
+            foreach (var a in args)
+            {
+                var item = myParameters.FirstOrDefault(p => p.Matches(a.Key));
+                if (item != null)
+                {
+                    item.Value = a.Value;
                     continue;
                 }
-                parameter.Value = a.Value;
+                SpecifiedCommands.Add(myCommands.FirstOrDefault(c => c.Matches(a.Key)));
             }
             myCommands
                 .Where(c => c.RequiredParams.Any(r => ValueOf(r) == Parameter.InvalidValue))
@@ -123,10 +133,7 @@ namespace juba.consoleapp.CmdLine
                 myCommands.First().Execute();
                 return;
             }
-            myCommands
-                .Where(c => IsSpecified(c.Names.First()))
-                .ToList()
-                .ForEach(c => c.Execute());
+            SpecifiedCommands.ForEach(c => c.Execute());
         }
 
         public List<string> Errors = new List<string>();
