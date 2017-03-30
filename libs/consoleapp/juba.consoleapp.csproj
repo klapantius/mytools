@@ -40,7 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CmdLine\CmdLine.cs" />
+    <Compile Include="CmdLine\Command.cs" />
+    <Compile Include="CmdLine\ICmdLineIItem.cs" />
     <Compile Include="CmdLine\ICmdLineParameter.cs" />
+    <Compile Include="CmdLine\ICmdLineCommand.cs" />
     <Compile Include="CmdLine\Parameter.cs" />
     <Compile Include="ExceptionBase.cs" />
     <Compile Include="CmdLine\ICmdLineInterpreter.cs" />

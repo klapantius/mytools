@@ -7,7 +7,9 @@ namespace juba.consoleapp.CmdLine
 {
     public class Interpreter : ICmdLineInterpreter
     {
-        private readonly List<Parameter> myParameters = new List<Parameter>();
+        private readonly List<ICmdLineCommand> myCommands= new List<ICmdLineCommand>();
+        private readonly List<ICmdLineParameter> myParameters = new List<ICmdLineParameter>();
+
         public string ValueOf(string paramName)
         {
             var asked = myParameters.FirstOrDefault(p => p.Matches(paramName));
@@ -47,7 +49,7 @@ namespace juba.consoleapp.CmdLine
             return !string.IsNullOrEmpty(ValueOf(paramName));
         }
 
-        public Parameter Add(Parameter parameter)
+        public ICmdLineParameter Add(ICmdLineParameter parameter)
         {
             if (myParameters.Any(p => p.Matches(parameter)))
             {
@@ -57,9 +59,19 @@ namespace juba.consoleapp.CmdLine
             return parameter;
         }
 
+        public ICmdLineCommand Add(ICmdLineCommand comamnd)
+        {
+            if (myCommands.Any(p => p.Matches(comamnd)))
+            {
+                throw new Exception(string.Format("Parameter definition \"{0}\" is ambiguous.", comamnd.Names.First()));
+            }
+            myCommands.Add(comamnd);
+            return comamnd;
+        }
+        
         public bool Parse(params string[] inArgs)
         {
-            const string ParamSeparators = "/-";
+            const string ItemSeparators = "/-";
             const string ValueSeparators = ":=";
             Errors.Clear();
             const string sub = @"( [\/\-].*)";
@@ -68,7 +80,7 @@ namespace juba.consoleapp.CmdLine
             while (new Regex(pattern + sub).IsMatch(commandLine)) pattern += sub;
             var groups = new Regex(pattern).Match(commandLine).Groups;
             var splits = new List<string>();
-            for (var g = 1; g < groups.Count; ++g) splits.Add(groups[g].Value.Trim().Trim(ParamSeparators.ToCharArray()));
+            for (var g = 1; g < groups.Count; ++g) splits.Add(groups[g].Value.Trim().Trim(ItemSeparators.ToCharArray()));
             var args = splits
                 .Where(a => !string.IsNullOrEmpty(a.Trim()))
                 .Select(a => a.Trim().Split(ValueSeparators.ToArray()))
@@ -83,22 +95,41 @@ namespace juba.consoleapp.CmdLine
                 }
                 parameter.Value = a.Value;
             }
+            myCommands
+                .Where(c => c.RequiredParams.Any(r => ValueOf(r) == Parameter.InvalidValue))
+                .ToList()
+                .ForEach(c => c.RequiredParams
+                    .Where(r => ValueOf(r) == Parameter.InvalidValue)
+                    .ToList()
+                    .ForEach(r => Errors.Add(string.Format("Command \"{0}\" requires parameter \"{1}\".", c.Names.First(), c))));
             myParameters
                 .Where(p => p.IsMandatory && p.Value == Parameter.InvalidValue)
                 .ToList()
                 .ForEach(p => Errors.Add(string.Format("Missing mandatory parameter \"{0}\"", p.Names.First())));
             myParameters
-              .Where(p => p.CoParams.Any(c => ValueOf(c) == Parameter.InvalidValue))
+              .Where(p => p.RequiredParams.Any(c => ValueOf(c) == Parameter.InvalidValue))
               .ToList()
-              .ForEach(p => p.CoParams
+              .ForEach(p => p.RequiredParams
                 .Where(c => ValueOf(c) == Parameter.InvalidValue)
                 .ToList()
                 .ForEach(c => Errors.Add(string.Format("Parameter \"{0}\" requires parameter \"{1}\".", p.Names.First(), c))));
             return !Errors.Any();
         }
 
-        public List<string> Errors = new List<string>();
+        public void ExecuteCommands()
+        {
+            if (myCommands.Count == 1)
+            {
+                myCommands.First().Execute();
+                return;
+            }
+            myCommands
+                .Where(c => IsSpecified(c.Names.First()))
+                .ToList()
+                .ForEach(c => c.Execute());
+        }
 
+        public List<string> Errors = new List<string>();
 
         public void PrintErrors(string prgName)
         {
@@ -106,5 +137,6 @@ namespace juba.consoleapp.CmdLine
             Console.WriteLine("\nusage:");
             Console.WriteLine("{0} {1}", prgName, string.Join(" ", myParameters.Select(p => p.ToString())));
         }
+
     }
 }
