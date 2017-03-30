@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -25,7 +26,8 @@ namespace testrunanalyzer
         private static void Main(string[] args)
         {
             var cmd = new CmdLine.Interpreter();
-            cmd.Add(new CmdLine.Parameter(new[] { "build" }, "build definition name", false));
+            cmd.Add(new CmdLine.Parameter(new[] { "build" }, "build id or build definition name (wildchars accepted)", false));
+            cmd.Add(new CmdLine.Parameter(new[] { "days" }, "number of asked days if build definition is specified", false, "1"));
             cmd.Add(new CmdLine.Parameter(new[] { "teamproject", "tp" }, "team project name", false, "syngo.net"));
             cmd.Add(new CmdLine.Parameter(new[] { "teamprojectcollection", "tpc" }, "team project collection uri", false, "https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"));
             cmd.Add(new CmdLine.Parameter(new[] { "verbose", "v", "debug", "d" }, "verbose mode", false, "false"));
@@ -46,7 +48,11 @@ namespace testrunanalyzer
             ioc.Register<TestRunAnalyzer>();
 
             var a = ioc.GetInstance<TestRunAnalyzer>();
-            a.Analyze(cmd.ValueOf("tp"), cmd.ValueOf("build"));
+            a.Analyze(
+                cmd.ValueOf("tp"),
+                cmd.ValueOf("build"),
+                cmd.Evaluate("days", CmdLine.Interpreter.DefaultIntConverter,
+                    (x) => { if (x <= 0) throw new Exception("The specified number of days is not valid"); }));
 
             Console.WriteLine("\n\ndone");
             Console.ReadKey();
@@ -64,13 +70,20 @@ namespace testrunanalyzer
             myTestManagementTeamProject = testManagementTeamProject;
         }
 
-        public void Analyze(string teamProjectName, string buildDefinitionName)
+        public void Analyze(string teamProjectName, string buildSpec, int days)
         {
-            var spec = myBuildServer.CreateBuildDetailSpec(teamProjectName, buildDefinitionName);
-            //spec.Status = BuildStatus.PartiallySucceeded | BuildStatus.Failed;
-            spec.Status = (BuildStatus.All & ~BuildStatus.InProgress);
+            var spec = myBuildServer.CreateBuildDetailSpec(teamProjectName);
             spec.InformationTypes = null;
-            spec.MinFinishTime = DateTime.Now.AddDays(-1); //sinceDate;
+            spec.Status = (BuildStatus.All & ~BuildStatus.InProgress);
+            if (new Regex(@"\d$").IsMatch(buildSpec))
+            {
+                spec.BuildNumber = buildSpec;
+            }
+            else
+            {
+                spec.DefinitionSpec.Name = buildSpec;
+                spec.MinFinishTime = DateTime.Today - TimeSpan.FromDays(days - 1);
+            }
             spec.QueryOrder = BuildQueryOrder.FinishTimeDescending;
 
             var data = CollectData(myBuildServer.QueryBuilds(spec).Builds);
@@ -101,7 +114,7 @@ namespace testrunanalyzer
                 var testRuns = myTestManagementTeamProject.TestRuns.ByBuild(buildDetail.Uri);
                 foreach (var testRun in testRuns)
                 {
-                    var item= new TestExecutionData()
+                    var item = new TestExecutionData()
                     {
                         build = buildDetail.BuildNumber,
                         assembly = testRun.Title.Substring(0, testRun.Title.LastIndexOf(".dll", StringComparison.InvariantCultureIgnoreCase)),
@@ -120,7 +133,7 @@ namespace testrunanalyzer
         {
             var x = testRun.Attachments.FirstOrDefault(foo => foo.AttachmentType == "TmiTestRunSummary");
             if (x == null) return string.Empty;
-            
+
             var array = new byte[99999999];
             x.DownloadToArray(array, 0);
             var txt = Encoding.UTF8.GetString(array).TrimEnd('\0');
@@ -130,7 +143,7 @@ namespace testrunanalyzer
             }
             var d = XDocument.Parse(txt);
             if (d.Root == null) return string.Empty;
-            
+
             var node = d.Descendants()
                 .FirstOrDefault(foo => foo.Attributes()
                     .Any(a => a.Name.LocalName == "name" && a.Value == "RelativeOutputPath"));
