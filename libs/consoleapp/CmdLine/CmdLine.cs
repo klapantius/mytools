@@ -105,13 +105,14 @@ namespace juba.consoleapp.CmdLine
                 }
                 SpecifiedCommands.Add(myCommands.FirstOrDefault(c => c.Matches(a.Key)));
             }
-            myCommands
-                .Where(c => c.RequiredParams.Any(r => ValueOf(r) == Parameter.InvalidValue))
+            if (!SpecifiedCommands.Any() && myCommands.Count == 1) SpecifiedCommands.Add(myCommands.First());
+            SpecifiedCommands
+                .Where(c => c.RequiredParams.Any(r => !IsSpecified(r)))
                 .ToList()
                 .ForEach(c => c.RequiredParams
-                    .Where(r => ValueOf(r) == Parameter.InvalidValue)
+                    .Where(r => !IsSpecified(r))
                     .ToList()
-                    .ForEach(r => Errors.Add(string.Format("Command \"{0}\" requires parameter \"{1}\".", c.Names.First(), c))));
+                    .ForEach(r => Errors.Add(string.Format("Command \"{0}\" requires parameter \"{1}\".", c.Names.First(), r))));
             myParameters
                 .Where(p => p.IsMandatory && p.Value == Parameter.InvalidValue)
                 .ToList()

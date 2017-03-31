@@ -49,7 +49,7 @@ namespace juba.consoleapp.CmdLine
 
         public override string ToString()
         {
-            var result = IsMandatory ? "[" : "" + "<" + string.Join("|", Names) + ">";
+            var result = (IsMandatory ? "[" : "") + (Names.Count() > 1 ? "<" : "") + string.Join("|", Names) + (Names.Count() > 1 ? ">" : "");
             result += ":<string>";
             result += IsMandatory ? "]" : "";
             return result;

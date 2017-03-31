@@ -15,7 +15,12 @@ namespace juba.consoleapp.CmdLine
 
         public void Execute()
         {
-            myAction();
+            try
+            {
+                myAction();
+            }
+            catch (ExceptionBase exception) { Out.Error(exception.Message); }
+            catch (Exception exception) { Out.Error(exception.ToString()); }
         }
     }
 }
