@@ -16,6 +16,7 @@ namespace testrunanalyzer
     public interface ITestExecutionDataCollector
     {
         List<TestExecutionData> CollectData(IBuildDetail[] builds);
+        string GetDropFolder(TestExecutionData data);
     }
 
     public class TestExecutionDataCollector : ITestExecutionDataCollector
@@ -38,17 +39,21 @@ namespace testrunanalyzer
                 {
                     var item = new TestExecutionData()
                     {
-                        build = buildDetail.BuildNumber,
-                        buildDefinition = buildDetail.BuildDefinition.Name,
-                        assembly = testRun.Title.Substring(0, testRun.Title.LastIndexOf(".dll", StringComparison.InvariantCultureIgnoreCase)),
-                        duration = testRun.DateCompleted - testRun.DateStarted,
-                        dropFolder = Path.Combine(Path.GetDirectoryName(buildDetail.LogLocation), GetRelativeOutputPath(testRun)),
+                        Build = buildDetail.BuildNumber,
+                        BuildDefinition = buildDetail.BuildDefinition.Name,
+                        TestRun = testRun,
+                        BuildLogLocation = Path.GetDirectoryName(buildDetail.LogLocation),
                     };
                     result.Add(item);
-                    Out.Log("\t{0} {1} {2}", item.duration, item.assembly, item.dropFolder);
+                    Out.Log("\t{0} {1}", item.Duration.ToString("g"), item.Assembly);
                 }
             }
             return result;
+        }
+
+        public string GetDropFolder(TestExecutionData data)
+        {
+            return Path.Combine(data.BuildLogLocation, GetRelativeOutputPath(data.TestRun));
         }
 
         private static readonly string myByteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());

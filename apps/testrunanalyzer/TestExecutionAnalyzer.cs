@@ -37,9 +37,16 @@ namespace testrunanalyzer
 
             var data = myDataCollector.CollectData(myBuildServer.QueryBuilds(spec).Builds);
             Console.WriteLine("Top 10:");
-            data.OrderByDescending(i => Convert.ToInt32((double)i.duration.TotalMilliseconds))
+            data.OrderByDescending(i => Convert.ToInt32((double)i.Duration.TotalMilliseconds))
+                .GroupBy(i => i.Assembly)
+                .Where(g => g.Count() > 1)
+                .Take(10)
                 .ToList()
-                .Take(10).ToList().ForEach(i => Out.Info("\t{0}", i));
+                .ForEach(i =>
+                {
+                    Out.Info("\t{0}\t{1}", i.First(), myDataCollector.GetDropFolder(i.First()));
+                    Out.Log("\t\t  ({0})", string.Join(", ", i.Select(r => r.Duration.ToString("g"))));
+                });
         }
     }
 }
