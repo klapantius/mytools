@@ -8,7 +8,7 @@ using juba.tfs.wrappers;
 using SimpleInjector;
 
 using juba.consoleapp.CmdLine;
-using Command=juba.consoleapp.CmdLine.Command;
+using Command = juba.consoleapp.CmdLine.Command;
 
 
 namespace testrunanalyzer
@@ -30,9 +30,11 @@ namespace testrunanalyzer
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
             cmd.Add(new Parameter(new[] { "build" }, "build id or build definition name (wildchars accepted)", false));
             cmd.Add(new Parameter(new[] { "days" }, "number of asked days if build definition is specified", false, "1"));
+            cmd.Add(new Parameter(new[] { "threshold", "maxmin" }, "longest accepted testrun duration in minutes", false, "20"));
+            cmd.Add(new Parameter(new[] { "peakfilter" }, "% of runs longer then threshold to take it as relevant", false, "33"));
             cmd.Add(new Parameter(new[] { "teamproject", "tp" }, "team project name", false, "syngo.net"));
             cmd.Add(new Parameter(new[] { "teamprojectcollection", "tpc" }, "team project collection uri", false, "https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"));
-            cmd.Add(new Parameter(new[] { "verbose", "v"}, "verbose mode", false, "false"));
+            cmd.Add(new Parameter(new[] { "verbose", "v" }, "verbose mode", false, "false"));
             cmd.Add(new Parameter(new[] { "anykey" }, "doesn't exit at the end", false, "false"));
             cmd.Add(new Command(new[] { "top10" }, "lists the 10 longest assemblies", () =>
             {
@@ -41,11 +43,14 @@ namespace testrunanalyzer
                     cmd.ValueOf("tp"),
                     cmd.ValueOf("build"),
                     cmd.Evaluate("days", Interpreter.DefaultIntConverter,
-                        (x) => { if (x <= 0) throw new Exception("The specified number of days is not valid"); }));
+                        (x) => { if (x <= 0) throw new Exception("The specified number of days is not valid."); }),
+                    cmd.Evaluate("threshold", Interpreter.DefaultIntConverter,
+                        (x) => { if (x <= 0) throw new Exception("The specified duration threshold is not valid."); }),
+                    cmd.Evaluate("peakfilter", Interpreter.DefaultIntConverter,
+                        (x) => { if (x <= 0 || x>100) throw new Exception("The specified peak filter is not valid. It must be in range 1-100"); })
+                    );
 
             })).Requires("build");
-            //cmd.Add(new Parameter(new[] {"Iam"}, "a name", false));
-            //cmd.Add(new Command(new []{"hello"}, "greeting", () => Out.Info("hello {0}", cmd.ValueOf("iam")))).Requires("iam");
 
             if (!cmd.Parse(args))
             {
