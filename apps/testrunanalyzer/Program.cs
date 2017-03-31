@@ -32,7 +32,8 @@ namespace testrunanalyzer
             cmd.Add(new Parameter(new[] { "days" }, "number of asked days if build definition is specified", false, "1"));
             cmd.Add(new Parameter(new[] { "teamproject", "tp" }, "team project name", false, "syngo.net"));
             cmd.Add(new Parameter(new[] { "teamprojectcollection", "tpc" }, "team project collection uri", false, "https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"));
-            cmd.Add(new Parameter(new[] { "verbose", "v", "debug", "d" }, "verbose mode", false, "false"));
+            cmd.Add(new Parameter(new[] { "verbose", "v"}, "verbose mode", false, "false"));
+            cmd.Add(new Parameter(new[] { "anykey" }, "doesn't exit at the end", false, "false"));
             cmd.Add(new Command(new[] { "top10" }, "lists the 10 longest assemblies", () =>
             {
                 var a = ioc.GetInstance<TestExecutionAnalyzer>();
@@ -56,8 +57,11 @@ namespace testrunanalyzer
 
             cmd.ExecuteCommands();
 
-            Console.WriteLine("\n\ndone");
-            Console.ReadKey();
+            if (cmd.Evaluate("anykey", Interpreter.DefaultBoolConverter))
+            {
+                Console.WriteLine("\n\ndone, please press a key to finish the execution");
+                Console.ReadKey();
+            }
         }
     }
 }
