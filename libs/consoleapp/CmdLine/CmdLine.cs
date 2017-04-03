@@ -5,11 +5,14 @@ using System.Text.RegularExpressions;
 
 namespace juba.consoleapp.CmdLine
 {
+    // todo: make "anykey" to an automatic parameter
+    // todo: automatic paramters should not be displayed in the help(?)
+    // todo: define BelongsTo(params string[] commands) ==> modify the help accordingly (sorting of paramters)
+    // todo: display optional parameters with square brackets
     public class Interpreter : ICmdLineInterpreter
     {
         private readonly List<ICmdLineCommand> myCommands = new List<ICmdLineCommand>();
         private readonly List<ICmdLineParameter> myParameters = new List<ICmdLineParameter>();
-        private List<ICmdLineItem> AllKnownItems { get { return myCommands.Cast<ICmdLineItem>().Union(myParameters).ToList(); } }
         private List<ICmdLineCommand> SpecifiedCommands { get; set; }
 
         public string ValueOf(string paramName)
@@ -61,14 +64,15 @@ namespace juba.consoleapp.CmdLine
             return parameter;
         }
 
-        public ICmdLineCommand Add(ICmdLineCommand comamnd)
+        public ICmdLineCommand Add(ICmdLineCommand command, params string[] requiredParameters)
         {
-            if (myCommands.Any(p => p.Matches(comamnd)))
+            if (myCommands.Any(p => p.Matches(command)))
             {
-                throw new Exception(string.Format("Parameter definition \"{0}\" is ambiguous.", comamnd.Names.First()));
+                throw new Exception(string.Format("Parameter definition \"{0}\" is ambiguous.", command.Names.First()));
             }
-            myCommands.Add(comamnd);
-            return comamnd;
+            if (requiredParameters != null && requiredParameters.Length > 0) command.Requires(requiredParameters);
+            myCommands.Add(command);
+            return command;
         }
 
         public bool Parse(params string[] inArgs)
@@ -87,13 +91,6 @@ namespace juba.consoleapp.CmdLine
                 .Where(a => !string.IsNullOrEmpty(a.Trim()))
                 .Select(a => a.Trim().Split(ValueSeparators.ToArray()))
                 .ToDictionary(a => a[0].ToLower().Trim('/', '-'), a => a.Count() > 1 ? a[1] : "true");
-            foreach (var a in args)
-            {
-                if (!AllKnownItems.Any(p => p.Matches(a.Key)))
-                {
-                    Errors.Add(string.Format("Not supported entity: \"{0}\"", a.Key));
-                }
-            }
             SpecifiedCommands = new List<ICmdLineCommand>();
             foreach (var a in args)
             {
@@ -103,7 +100,8 @@ namespace juba.consoleapp.CmdLine
                     item.Value = a.Value;
                     continue;
                 }
-                SpecifiedCommands.Add(myCommands.FirstOrDefault(c => c.Matches(a.Key)));
+                if (myCommands.Any(c => c.Matches(a.Key))) SpecifiedCommands.Add(myCommands.First(c => c.Matches(a.Key)));
+                else Errors.Add(string.Format("Not supported command line argument: \"{0}\"", a.Key));
             }
             if (!SpecifiedCommands.Any() && myCommands.Count == 1) SpecifiedCommands.Add(myCommands.First());
             SpecifiedCommands
@@ -142,8 +140,44 @@ namespace juba.consoleapp.CmdLine
         public void PrintErrors(string prgName)
         {
             Errors.ForEach(Console.WriteLine);
+            PrintUsage(prgName);
+        }
+
+        //todo: make PrintUsage to an automatically added command
+        public void PrintUsage(string prgName)
+        {
             Console.WriteLine("\nusage:");
-            Console.WriteLine("{0} {1}", prgName, string.Join(" ", myParameters.Select(p => p.ToString())));
+            if (myCommands != null && myCommands.Count > 1) Console.WriteLine("{0} {1}", prgName, string.Join(" /", myCommands.Union(myParameters.Cast<ICmdLineItem>()).Select(p => p.Help(false))));
+            else Console.WriteLine("{0} {1}", prgName, string.Join(" ", myParameters.Select(p => p.Help(false))));
+
+            if (myCommands.Count > 1)
+            {
+                foreach (var c in myCommands)
+                {
+                    Console.WriteLine("\t{0}", c.Help(true));
+                    if (!c.RequiredParams.Any()) continue;
+                    PrintParamsOf(c);
+                }
+                Console.WriteLine("Global parameters:");
+                foreach (var p in myParameters.Where(myp => !myCommands.Any(c => c.RequiredParams.Any(myp.Matches))))
+                {
+                    Console.WriteLine("\t{0}", p.Help(true));
+                }
+            }
+            else
+            {
+                PrintParamsOf(null);
+            }
+        }
+
+        private void PrintParamsOf(ICmdLineCommand cmd)
+        {
+            foreach (var pname in cmd != null ? cmd.RequiredParams : myParameters.Select(p => p.Names.First()))
+            {
+                var par = myParameters.FirstOrDefault(p => p.Matches(pname));
+                if (par == null) continue;
+                Console.WriteLine("\t\t{0}", par.Help(true));
+            }
         }
 
     }

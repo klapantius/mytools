@@ -8,8 +8,9 @@ namespace juba.consoleapp.CmdLine
         string[] Names { get; }
         string Description { get; }
         List<string> RequiredParams { get; }
-        void Requires(params string[] coparams);
+        void Requires(params string[] items);
         bool Matches(ICmdLineItem other);
         bool Matches(string name);
+        string Help(bool verbose);
     }
 }

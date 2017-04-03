@@ -28,15 +28,15 @@ namespace testrunanalyzer
             ioc.Register<TestExecutionAnalyzer>();
 
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
-            cmd.Add(new Parameter(new[] { "build" }, "build id or build definition name (wildchars accepted)", false));
-            cmd.Add(new Parameter(new[] { "days" }, "number of asked days if build definition is specified", false, "1"));
-            cmd.Add(new Parameter(new[] { "threshold" }, "longest accepted testrun duration in minutes", false, "20"));
-            cmd.Add(new Parameter(new[] { "peakfilter" }, "% of runs longer then threshold to take it as relevant", false, "33"));
-            cmd.Add(new Parameter(new[] { "teamproject", "tp" }, "team project name", false, "syngo.net"));
-            cmd.Add(new Parameter(new[] { "teamprojectcollection", "tpc" }, "team project collection uri", false, "https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"));
-            cmd.Add(new Parameter(new[] { "verbose", "v" }, "verbose mode", false, "false"));
-            cmd.Add(new Parameter(new[] { "anykey" }, "doesn't exit at the end", false, "false"));
-            cmd.Add(new Command(new[] { "top10" }, "lists the 10 longest assemblies", () =>
+            cmd.Add(new Parameter(new[] { "build" }, "name or id", "build id or build definition name (wildchars accepted)", false));
+            cmd.Add(new Parameter(new[] { "days" }, "count", "number of asked days if build definition is specified", false, "1"));
+            cmd.Add(new Parameter(new[] { "threshold" }, "minutes", "longest accepted testrun duration in minutes", false, "20"));
+            cmd.Add(new Parameter(new[] { "peakfilter" }, "percent", "% of runs longer then threshold to take it as relevant", false, "33"));
+            cmd.Add(new Parameter(new[] { "teamproject", "tp" }, "name", "team project name", false, "syngo.net"));
+            cmd.Add(new Parameter(new[] { "teamprojectcollection", "tpc" }, "uri", "team project collection uri", false, "https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"));
+            cmd.Add(new Parameter(new[] { "verbose", "v" }, "bool", "verbose mode", false, "false"));
+            cmd.Add(new Parameter(new[] { "anykey" }, "bool", "doesn't exit at the end", false, "false"));
+            cmd.Add(new Command(new[] { "top10" }, "list the 10 longest running assemblies", () =>
             {
                 var a = ioc.GetInstance<TestExecutionAnalyzer>();
                 a.Analyze(

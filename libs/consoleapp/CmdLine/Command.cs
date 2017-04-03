@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+
 
 namespace juba.consoleapp.CmdLine
 {
@@ -22,5 +24,13 @@ namespace juba.consoleapp.CmdLine
             catch (ExceptionBase exception) { Out.Error(exception.Message); }
             catch (Exception exception) { Out.Error(exception.ToString()); }
         }
+
+        public override string Help(bool verbose)
+        {
+            return !verbose
+                ? string.Format("[/{0}]", Names.First())
+                : string.Format("/{0}: {1}", string.Join("|", Names), Description);
+        }
+
     }
 }
