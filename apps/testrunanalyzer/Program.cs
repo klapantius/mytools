@@ -29,15 +29,16 @@ namespace testrunanalyzer
             ioc.Register<AssemblyAnalyzer>();
 
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
-            cmd.Add(new Parameter(new[] { "build" }, "name or id", "build id or build definition name (wildchars accepted)", false));
-            cmd.Add(new Parameter(new[] { "days" }, "count", "number of asked days if build definition is specified", false, "1"));
-            cmd.Add(new Parameter(new[] { "threshold" }, "minutes", "longest accepted testrun duration in minutes", false, "20"));
-            cmd.Add(new Parameter(new[] { "peakfilter" }, "percent", "% of runs longer then threshold to take it as relevant", false, "33"));
             cmd.Add(new Parameter(new[] { "teamproject", "tp" }, "name", "team project name", false, "syngo.net"));
             cmd.Add(new Parameter(new[] { "teamprojectcollection", "tpc" }, "uri", "team project collection uri", false, "https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"));
-            cmd.Add(new Parameter(new[] { "extendedoutput", "ext" }, "bool", "display the durations taken", false, "false"));
             cmd.Add(new Parameter(new[] { "verbose", "v" }, "bool", "verbose mode - lists all builds and executions while collecting them", false, "false"));
             cmd.Add(new Parameter(new[] { "anykey" }, "bool", "doesn't exit at the end", false, "false"));
+
+            cmd.Add(new Parameter(new[] { "build" }, "name or id", "build id or build definition name (wildchars accepted)", false));
+            cmd.Add(new Parameter(new[] { "days" }, "count", "number of asked days if build definition is specified", false, "1")).BelongsTo("top10", "findassembly");
+            cmd.Add(new Parameter(new[] { "threshold" }, "minutes", "longest accepted testrun duration in minutes", false, "20")).BelongsTo("top10");
+            cmd.Add(new Parameter(new[] { "peakfilter" }, "percent", "% of runs longer then threshold to take it as relevant", false, "33")).BelongsTo("top10");
+            cmd.Add(new Parameter(new[] { "extendedoutput", "ext" }, "bool", "display the durations taken", false, "false")).BelongsTo("top10");
             cmd.Add(new Command(new[] { "top10" }, "list the 10 longest running assemblies", () =>
             {
                 var a = ioc.GetInstance<TestExecutionAnalyzer>();
@@ -54,7 +55,7 @@ namespace testrunanalyzer
                     );
 
             })).Requires("build");
-            cmd.Add(new Parameter(new[] {"assembly"}, "name or regex", "specification of asked assembly", false));
+            cmd.Add(new Parameter(new[] {"assembly"}, "name or regex", "specification of asked assembly", false)).BelongsTo("findassembly");
             cmd.Add(new Command(new []{"findassembly"}, "collect the executions of a specified assembly", () =>
             {
                 var a = ioc.GetInstance<AssemblyAnalyzer>();

@@ -44,6 +44,7 @@
     <Compile Include="CmdLine\ICmdLineIItem.cs" />
     <Compile Include="CmdLine\ICmdLineParameter.cs" />
     <Compile Include="CmdLine\ICmdLineCommand.cs" />
+    <Compile Include="CmdLine\Item.cs" />
     <Compile Include="CmdLine\Parameter.cs" />
     <Compile Include="ExceptionBase.cs" />
     <Compile Include="CmdLine\ICmdLineInterpreter.cs" />

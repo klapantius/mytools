@@ -4,39 +4,6 @@ using System.Linq;
 
 namespace juba.consoleapp.CmdLine
 {
-    public class Item : ICmdLineItem
-    {
-        public string[] Names { get; private set; }
-        public string Description { get; private set; }
-        public List<string> RequiredParams { get; private set; }
-
-        public Item(IEnumerable<string> names, string description)
-        {
-            Names = names.Select(n => n.ToLower()).ToArray();
-            Description = description;
-            RequiredParams = new List<string>();
-        }
-
-        public void Requires(params string[] coparams)
-        {
-            RequiredParams.AddRange(coparams.Where(newOne => !RequiredParams.Any(oldOne => oldOne.Equals(newOne, StringComparison.InvariantCultureIgnoreCase))));
-        }
-
-        public bool Matches(ICmdLineItem other)
-        {
-            return Names.Any(n => other.Names.Any(o => o == n));
-        }
-        public bool Matches(string name)
-        {
-            return Names.Any(n => n == name.ToLower());
-        }
-
-        public virtual string Help(bool multiLine)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class Parameter : Item, ICmdLineParameter
     {
         public const string InvalidValue = "invalid value 9a9f9v0adfg";
@@ -44,6 +11,7 @@ namespace juba.consoleapp.CmdLine
         public bool IsMandatory { get; private set; }
         public string DefaultValue { get; private set; }
         public string Value { get; set; }
+        public List<string> AffectedCommands { get; private set; }
 
         public Parameter(IEnumerable<string> names, string shortValueDescription, string description, bool isMandatory, string defaultValue = InvalidValue)
             : base(names, description)
@@ -52,6 +20,12 @@ namespace juba.consoleapp.CmdLine
             IsMandatory = isMandatory;
             DefaultValue = IsMandatory ? InvalidValue : defaultValue;
             Value = DefaultValue;
+            AffectedCommands=new List<string>();
+        }
+
+        public void BelongsTo(params string[] commands)
+        {
+            AffectedCommands.AddRange(commands.Where(newOne => !AffectedCommands.Any(oldOne => oldOne.Equals(newOne, StringComparison.InvariantCultureIgnoreCase))));
         }
 
         public override string ToString()
