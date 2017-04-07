@@ -26,6 +26,7 @@ namespace testrunanalyzer
             ioc.Register(() => ioc.GetInstance<ITestManagementTeamProjectProvider>().GeTestManagementTeamProject(ioc.GetInstance<ICmdLineInterpreter>().ValueOf("tp")));
             ioc.Register<ITestExecutionDataCollector, TestExecutionDataCollector>();
             ioc.Register<TestExecutionAnalyzer>();
+            ioc.Register<AssemblyAnalyzer>();
 
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
             cmd.Add(new Parameter(new[] { "build" }, "name or id", "build id or build definition name (wildchars accepted)", false));
@@ -53,6 +54,19 @@ namespace testrunanalyzer
                     );
 
             })).Requires("build");
+            cmd.Add(new Parameter(new[] {"assembly"}, "name or regex", "specification of asked assembly", false));
+            cmd.Add(new Command(new []{"findassembly"}, "collect the executions of a specified assembly", () =>
+            {
+                var a = ioc.GetInstance<AssemblyAnalyzer>();
+                a.Analyze(
+                    cmd.ValueOf("tp"),
+                    cmd.ValueOf("build"),
+                    cmd.Evaluate("days", Interpreter.DefaultIntConverter,
+                        (x) => { if (x <= 0) throw new ExceptionBase("The specified number of days is not valid."); }),
+                    cmd.ValueOf("assembly")
+                    );
+                
+            })).Requires("build", "assembly");
 
             if (!cmd.Parse(args))
             {
