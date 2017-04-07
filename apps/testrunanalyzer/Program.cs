@@ -34,7 +34,8 @@ namespace testrunanalyzer
             cmd.Add(new Parameter(new[] { "peakfilter" }, "percent", "% of runs longer then threshold to take it as relevant", false, "33"));
             cmd.Add(new Parameter(new[] { "teamproject", "tp" }, "name", "team project name", false, "syngo.net"));
             cmd.Add(new Parameter(new[] { "teamprojectcollection", "tpc" }, "uri", "team project collection uri", false, "https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"));
-            cmd.Add(new Parameter(new[] { "verbose", "v" }, "bool", "verbose mode", false, "false"));
+            cmd.Add(new Parameter(new[] { "extendedoutput", "ext" }, "bool", "display the durations taken", false, "false"));
+            cmd.Add(new Parameter(new[] { "verbose", "v" }, "bool", "verbose mode - lists all builds and executions while collecting them", false, "false"));
             cmd.Add(new Parameter(new[] { "anykey" }, "bool", "doesn't exit at the end", false, "false"));
             cmd.Add(new Command(new[] { "top10" }, "list the 10 longest running assemblies", () =>
             {
@@ -47,7 +48,8 @@ namespace testrunanalyzer
                     cmd.Evaluate("threshold", Interpreter.DefaultIntConverter,
                         (x) => { if (x <= 0) throw new ExceptionBase("The specified duration threshold is not valid."); }),
                     cmd.Evaluate("peakfilter", Interpreter.DefaultIntConverter,
-                        (x) => { if (x <= 0 || x > 100) throw new ExceptionBase("The specified peak filter is not valid. It must be in range 1-100"); })
+                        (x) => { if (x <= 0 || x > 100) throw new ExceptionBase("The specified peak filter is not valid. It must be in range 1-100"); }),
+                    cmd.Evaluate("extendedoutput", Interpreter.DefaultBoolConverter)
                     );
 
             })).Requires("build");

@@ -19,7 +19,7 @@ namespace testrunanalyzer
             myDataCollector = dataCollector;
         }
 
-        public void Analyze(string teamProjectName, string buildSpec, int days, int threshold, int peakfilter)
+        public void Analyze(string teamProjectName, string buildSpec, int days, int threshold, int peakfilter, bool extendedoutput)
         {
             var spec = myBuildServer.CreateBuildDetailSpec(teamProjectName);
             spec.InformationTypes = null;
@@ -47,7 +47,7 @@ namespace testrunanalyzer
                 {
                     var i = g.OrderByDescending(r => r.Duration.TotalMinutes).ToList();
                     Out.Info("\t{0}\t{1}", i.First(), myDataCollector.GetDropFolder(i.First()));
-                    Out.Log("\t\t  ({0})", string.Join(", ", i.Select(r => r.Duration.ToString("g"))));
+                    if (extendedoutput) Out.Info("\t\t  ({0})", string.Join(", ", i.Select(r => r.Duration.ToString("g"))));
                 });
         }
     }
