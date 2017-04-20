@@ -15,13 +15,13 @@ namespace fixtrax
         private static void Main(string[] args)
         {
             var i = new CmdLine.Interpreter();
-            i.Add(new CmdLine.Parameter(new[] { "changeset", "cs" }, "changeset to track", false));
-            i.Add(new CmdLine.Parameter(new[] { "module", "mb" }, "module branch to find changes (e.G. Core/PCP/v4) on it", false));
-            i.Add(new CmdLine.Parameter(new[] { "modules", "file" }, "a file containing module branches to find changes on there", false));
-            i.Add(new CmdLine.Parameter(new[] { "days", "for" }, "find changes of last how many days", false, "2"));
-            i.Add(new CmdLine.Parameter(new[] { "target", "ds" }, "target deployment set such Torus/PCP/VA30", true));
-            i.Add(new CmdLine.Parameter(new[] { "workitem", "wi", "bi", "defect" }, "workitem to track", false));
-            i.Add(new CmdLine.Parameter(new[] { "verbose", "v", "debug", "d" }, "verbose mode", false, "false"));
+            i.Add(new CmdLine.Parameter(new[] { "changeset", "cs" }, "CS id", "changeset to track", false));
+            i.Add(new CmdLine.Parameter(new[] { "module", "mb" }, "path", "module branch to find changes (e.G. Core/PCP/v4) on it", false));
+            i.Add(new CmdLine.Parameter(new[] { "modules", "file" }, "file name", "a file containing module branches to find changes on there", false));
+            i.Add(new CmdLine.Parameter(new[] { "days", "for" }, "count", "find changes of last how many days", false, "2"));
+            i.Add(new CmdLine.Parameter(new[] { "target", "ds" }, "path", "target deployment set such Torus/PCP/VA30", true));
+            i.Add(new CmdLine.Parameter(new[] { "workitem", "wi", "bi", "defect" }, "BI id", "workitem to track", false));
+            i.Add(new CmdLine.Parameter(new[] { "verbose", "v", "debug", "d" }, "bool", "verbose mode", false, "false"));
             if (!i.Parse(string.Join(" ", args)))
             {
                 i.PrintErrors("push.exe");
@@ -33,7 +33,9 @@ namespace fixtrax
             ioc.Register(() => new Uri("https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"), Lifestyle.Singleton);
             ioc.Register<IVersionControlServer, VersionControlServerWrapper>(Lifestyle.Singleton);
             ioc.Register<IWorkItemStore, WorkItemStoreWrapper>(Lifestyle.Singleton);
+            ioc.Register<IBranchFinder, BranchFinder>();
             ioc.Register<IVersionInfoFinder, VersionInfoFinder>();
+            ioc.Register<ILinkedChangesetsExtractor, LinkedChangesetsExtractor>();
             ioc.Register<FixTrax>();
 
             var tracker = ioc.GetInstance<FixTrax>();
@@ -64,6 +66,8 @@ namespace fixtrax
                     var workitem = i.Evaluate<int>("workitem", CmdLine.Interpreter.DefaultIntConverter,
                       (x) => { if (x <= 0) throw new Exception("The specified workitem id is not valid"); });
                     tracker.TrackWorkitem(workitem, dsName);
+                    Console.WriteLine("done");
+                    Console.ReadKey();
                     return;
                 }
 
