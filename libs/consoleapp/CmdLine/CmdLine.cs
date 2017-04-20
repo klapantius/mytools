@@ -102,6 +102,7 @@ namespace juba.consoleapp.CmdLine
                 if (myCommands.Any(c => c.Matches(a.Key))) SpecifiedCommands.Add(myCommands.First(c => c.Matches(a.Key)));
                 else Errors.Add(string.Format("Not supported command line argument: \"{0}\"", a.Key));
             }
+            if (!SpecifiedCommands.Any() && myCommands.Count > 1) Errors.Add("Please specify a command to be executed.");
             if (!SpecifiedCommands.Any() && myCommands.Count == 1) SpecifiedCommands.Add(myCommands.First());
             SpecifiedCommands
                 .Where(c => c.RequiredParams.Any(r => !IsSpecified(r)))
