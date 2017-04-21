@@ -1,5 +1,5 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 
 using juba.consoleapp;
@@ -17,33 +17,35 @@ namespace rsfainstanalyzer
             var ioc = new Container();
             ioc.Register<ICmdLineInterpreter, Interpreter>(Lifestyle.Singleton);
             ioc.Register<StepTimeAnalyzer, StepTimeAnalyzer>();
+            ioc.Register<ILogIterator, LogIterator>();
 
+            var analyzer = ioc.GetInstance<StepTimeAnalyzer>();
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
-            cmd.Add(new Parameter(new[] { "path" }, "path (wildcards are enabled at the end)", "path to the rsfa install log", false, @"\\fors34ba.ww005.siemens.net\tfssysint$\"));
-            cmd.Add(new Command(new[] { "byfile" }, "find longest executing steps in the install script", () =>
+            cmd.Add(new Parameter(new[] { "path" }, "path (wildcards are enabled at the end)", "path to the rsfa install log", true, @"\\fors34ba.ww005.siemens.net\tfssysint$\"));
+            cmd.Add(new Command(new[] { "groupbyfile" }, "finds longest executing steps in each log files", () =>
             {
-                var analyzer = ioc.GetInstance<StepTimeAnalyzer>();
-                var root = Path.GetDirectoryName(cmd.ValueOf("path"));
-                var dirPattern = cmd.ValueOf("path").Substring(root.Length + 1);
-                var dnames = Directory.GetFileSystemEntries(root, dirPattern, SearchOption.TopDirectoryOnly);
-                dnames.ToList().ForEach(d =>
+                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), (input) =>
                 {
-                    var fnames = Directory.GetFileSystemEntries(d, cmd.ValueOf("logname"), SearchOption.AllDirectories);
-                    fnames.ToList().ForEach(f =>
-                    {
-                        try
-                        {
-                            using (var input = new StreamReader(f))
-                            {
-                                Out.Info(f);
-                                var steps = analyzer.FindLongestSteps(input);
-                                steps.ForEach(s => Out.Info("\t{0}: {1}", s.Duration, s.Step));
-                            }
-                        }
-                        catch (IOException) { }
-                    });
+                    var steps = analyzer.FindLongestSteps(input);
+                    steps.ForEach(s => Out.Info("\t{0}: {1}", s.Duration, s.Step));
                 });
-            })).Requires("path");
+            }));
+
+            cmd.Add(new Command(new[] { "sortbytime" }, "finds longest steps of ALL matching logs", () =>
+            {
+                Out.Error("This is not available yet.");
+                //var results = new List<StepTimeAnalyzer.Result>();
+                //results.AddRange(steps);
+            }));
+
+            cmd.Add(new Command(new[] { "scriptduration", "sd" }, "calculates the average script execution duration", () =>
+            {
+                var durations = new List<TimeSpan>();
+                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), (input) => 
+                    durations.Add(analyzer.GetScriptDuration(input)));
+                var averageDuration = TimeSpan.FromSeconds(durations.Average(d => d.TotalSeconds));
+                Out.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), durations.Count, averageDuration);
+            }));
 
             cmd.Add(new Parameter(new[] { "logname" }, "pattern", "name pattern of an rsfa install log file", false, "rsfa.install.*.log"));
             cmd.Add(new Parameter(new[] { "verbose", "v" }, "bool", "verbose mode - lists all builds and executions while collecting them", false, "false"));
@@ -69,5 +71,6 @@ namespace rsfainstanalyzer
                 Console.ReadKey();
             }
         }
+
     }
 }

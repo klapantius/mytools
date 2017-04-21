@@ -33,7 +33,7 @@ namespace testrunanalyzer
             data.OrderByDescending(i => Convert.ToInt32((double)i.Duration.TotalMilliseconds))
                 .GroupBy(i => i.Assembly)
                 .Where(g => g.Average(r => r.Duration.TotalMinutes) > threshold
-                    || g.Count(r => r.Duration.Minutes > threshold) > g.Count() * peakfilter / 100)
+                    || g.Count(r => r.Duration.TotalMinutes > threshold) > g.Count() * peakfilter / 100)
                 .Take(10)
                 .ToList()
                 .ForEach(g =>

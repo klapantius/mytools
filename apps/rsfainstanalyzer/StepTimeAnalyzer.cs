@@ -5,12 +5,30 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+using juba.consoleapp;
+
 
 namespace rsfainstanalyzer
 {
-    internal class StepTimeAnalyzer
+    public class StepTimeAnalyzer
     {
-        internal static readonly Regex TimeStampRegex = new Regex(@"\d{2,4}\.\d{2}\.\d{2}\s+\d{2}:\d{2}:\d{2}[:\.]\d+\s");
+        internal static readonly Regex TimeStampRegex = new Regex(@"\d{2,4}[\.-]\d{2}[\.-]\d{2}[\s+,_]\d{2}:\d{2}:\d{2}([:\.]\d+)*\s");
+
+        public TimeSpan GetScriptDuration(TextReader input)
+        {
+            if (input == null) return TimeSpan.Zero;
+
+            var firstLineWithTimeStamp = FindNextLineIncludingTimeStamp(input);
+            string lastLineWithTimeStamp = string.Empty;
+            string line ;
+            while ((line = FindNextLineIncludingTimeStamp(input))!=null)
+            {
+                lastLineWithTimeStamp = line;
+            }
+            var diff = DifferenceBetweenLines(firstLineWithTimeStamp, lastLineWithTimeStamp);
+            Out.Log("\t{0}", diff);
+            return diff;
+        }
 
         public List<Result> FindLongestSteps(TextReader input, int maxCount = 10)
         {
@@ -52,7 +70,7 @@ namespace rsfainstanalyzer
         {
             var result = DateTime.MinValue;
             if (line == null || !TimeStampRegex.IsMatch(line)) return result;
-            var x = TimeStampRegex.Matches(line)[0].Value;
+            var x = TimeStampRegex.Matches(line)[0].Value.Replace("_", " ");
             // starter.exe prints a colon before milliseconds, while the standard delimiter is the dot
             if (!DateTime.TryParse(x, CultureInfo.CurrentCulture, DateTimeStyles.RoundtripKind, out result))
             {
@@ -63,10 +81,6 @@ namespace rsfainstanalyzer
                     x = string.Join("", y);
                 }
                 DateTime.TryParse(x, CultureInfo.CurrentCulture, DateTimeStyles.RoundtripKind, out result);
-            }
-            if (result > DateTime.Now)
-            {
-
             }
             return result;
         }
