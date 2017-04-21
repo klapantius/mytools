@@ -11,9 +11,9 @@ namespace rsfainst_utest
     [TestFixture]
     public class StepTimeAnalyzerTests
     {
-        private static readonly string FirstMatchingLine = "foo 16.08.27 12:00:00:000 bar";
-        private static readonly string SecondMatchingLine = "foo 16.08.27 12:03:14.000 bar";
-        private static readonly string ThirdMatchingLine = "foo 16.08.27 12:05:00.000 bar";
+        private static readonly string FirstMatchingLine = "STARTER: 16.08.27 12:00:00:000 3435/685 1st line in yymmdd format";
+        private static readonly string SecondMatchingLine = "[2016.08.27 12:03:14.000 +02] bar 2nd line in datastorage format";
+        private static readonly string ThirdMatchingLine = "STARTER: 27.08.16 12:05:00:000 466/3136 3rd line ddmmyy format";
         private static readonly string SampleContent =
             "bla" + Environment.NewLine +
             FirstMatchingLine + Environment.NewLine +
@@ -49,7 +49,9 @@ namespace rsfainst_utest
             var result = sut.FindLongestSteps(SampleReader);
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count, "Unexpected count of results.");
+            Assert.AreEqual(new TimeSpan(0, 3, 14), result[0].Duration, "Unexpected duration on the 1st place.");
             Assert.AreEqual(FirstMatchingLine, result[0].Step, "Unexpected result[0]");
+            Assert.AreEqual(new TimeSpan(0, 1, 46), result[1].Duration, "Unexpected duration on the 2nd place.");
             Assert.AreEqual(SecondMatchingLine, result[1].Step, "Unexpected result[1]");
         }
 

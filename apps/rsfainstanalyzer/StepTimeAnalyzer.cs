@@ -10,7 +10,7 @@ namespace rsfainstanalyzer
 {
     internal class StepTimeAnalyzer
     {
-        internal static readonly Regex TimeStampRegex = new Regex(@"\s\d\d\.\d\d.\d\d\s\d\d:\d\d:\d\d[:\.]\d\d\d\s");
+        internal static readonly Regex TimeStampRegex = new Regex(@"\d{2,4}\.\d{2}\.\d{2}\s+\d{2}:\d{2}:\d{2}[:\.]\d+\s");
 
         public List<Result> FindLongestSteps(TextReader input, int maxCount = 10)
         {
@@ -22,7 +22,14 @@ namespace rsfainstanalyzer
             string currentLine;
             while ((currentLine = FindNextLineIncludingTimeStamp(input)) != null)
             {
-                diffs.Last().Duration = DifferenceBetweenLines(diffs.Last().Step, currentLine);
+                var d = DifferenceBetweenLines(diffs.Last().Step, currentLine);
+                if (d > TimeSpan.FromDays(1))
+                {
+                    var x = Regex.Replace(currentLine, @"(?<first>\d{2})(?<middle>\.\d{2}\.)(?<last>\d{2})", 
+                        match => string.Format("{0}{1}{2}", match.Groups["last"], match.Groups["middle"], match.Groups["first"]));
+                    d = DifferenceBetweenLines(diffs.Last().Step, x);
+                }
+                diffs.Last().Duration = d;
                 diffs.Add(new Result(new TimeSpan(0), currentLine));
             }
             if (diffs.Any() && diffs.Last().Duration == new TimeSpan(0)) diffs.Remove(diffs.Last());
@@ -56,6 +63,10 @@ namespace rsfainstanalyzer
                     x = string.Join("", y);
                 }
                 DateTime.TryParse(x, CultureInfo.CurrentCulture, DateTimeStyles.RoundtripKind, out result);
+            }
+            if (result > DateTime.Now)
+            {
+
             }
             return result;
         }
