@@ -63,6 +63,7 @@ namespace rsfainstanalyzer
             var time1 = ExtractTimeStamp(line1);
             var time2 = ExtractTimeStamp(line2);
             if (time1 == DateTime.MinValue || time2 == DateTime.MinValue) return new TimeSpan(0);
+            //todo: move time correction logic with year-day switch to this place
             return time2 - time1;
         }
 

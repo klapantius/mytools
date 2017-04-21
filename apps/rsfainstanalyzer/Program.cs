@@ -41,8 +41,12 @@ namespace rsfainstanalyzer
             cmd.Add(new Command(new[] { "scriptduration", "sd" }, "calculates the average script execution duration", () =>
             {
                 var durations = new List<TimeSpan>();
-                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), (input) => 
-                    durations.Add(analyzer.GetScriptDuration(input)));
+                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), (input) =>
+                {
+                    var d = analyzer.GetScriptDuration(input);
+                    //todo: remove this workaround after the time correction switch is implemented at the right place
+                    if (TimeSpan.Zero < d && d < TimeSpan.FromHours(1)) durations.Add(d);
+                });
                 var averageDuration = TimeSpan.FromSeconds(durations.Average(d => d.TotalSeconds));
                 Out.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), durations.Count, averageDuration);
             }));
