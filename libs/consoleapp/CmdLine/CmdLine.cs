@@ -89,7 +89,7 @@ namespace juba.consoleapp.CmdLine
             var args = splits
                 .Where(a => !string.IsNullOrEmpty(a.Trim()))
                 .Select(a => a.Trim().Split(ValueSeparators.ToArray()))
-                .ToDictionary(a => a[0].ToLower().Trim('/', '-'), a => a.Count() > 1 ? a[1] : "true");
+                .ToDictionary(a => a[0].ToLower().Trim('/', '-'), a => a.Count() > 1 ? string.Join(":", a.Skip(1)) : "true");
             SpecifiedCommands = new List<ICmdLineCommand>();
             foreach (var a in args)
             {
