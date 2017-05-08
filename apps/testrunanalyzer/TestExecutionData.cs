@@ -30,9 +30,11 @@ namespace testrunanalyzer
             }
         }
 
+        public string DurationAsString { get { return string.Format("{0}:{1:D2}:{2:D2}", Duration.Hours, Duration.Minutes, Duration.Seconds); } }
+
         public override string ToString()
         {
-            return string.Format("{0}:{1:D2}:{2:D2} - {3}", Duration.Hours, Duration.Minutes, Duration.Seconds, Assembly);
+            return string.Format("{0} - {1}", DurationAsString, Assembly);
         }
     }
 }

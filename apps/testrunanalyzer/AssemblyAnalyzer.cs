@@ -32,12 +32,18 @@ namespace testrunanalyzer
             var result = myDataCollector.CollectData(myBuildServer.QueryBuilds(spec).Builds);
             var asss = new Regex(assemblyspec, RegexOptions.IgnoreCase);
             var data = result.Where(d => asss.IsMatch(d.Assembly)).ToList();
-            var differentAssemblies = data.GroupBy(d => d.Assembly).Count() > 1;
-            data.OrderByDescending(d => d.Duration).ToList()
-                .ForEach(d =>
+            var groupedByAssemblies = data.GroupBy(d => d.Assembly).ToList();
+            groupedByAssemblies.ForEach(a =>
+            {
+                Out.Info("{0} ({1} results)", a.Key, a.Count());
+                var max = a.Max(r => r.Duration.TotalSeconds);
+                var min = a.Min(r => r.Duration.TotalSeconds);
+                var tenPrc = (max - min) / 10;
+                a.ToList().ForEach(r =>
                 {
-                    Out.Info("{0} on {1} for {2}", d.Duration, d.TestRun.DateStarted.ToString("yy-MM-dd HH:mm"), d.Build);
+                    Out.Info("{2,10}- {0} {1}", r.DurationAsString, r.BuildLogLocation, new string('-', (int)((r.Duration.TotalSeconds-min)/tenPrc)));
                 });
+            });
         }
     }
 }
