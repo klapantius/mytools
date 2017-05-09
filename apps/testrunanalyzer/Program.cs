@@ -68,6 +68,15 @@ namespace testrunanalyzer
                     );
                 
             })).Requires("build", "assembly");
+            cmd.Add(new Command(new []{"usage"}, "further help", () =>
+            {
+                Out.Info("Usage:");
+                Out.Info("\t- Find long runners of a module. Example: testrunanalyzer /top10 /build:modules.foundations.main.*gc /days:21");
+                Out.Info("\t- Find the longest runners at all. Example: testrunanalyzer /top10 /build:modules.*.main.*gc /days:30 /extendedoutput");
+                Out.Info("\t  The above one displays the durations taken in count too.");
+                Out.Info("\t- Display the execution durations of a test. Example: testrunanalyzer /findassembly /assembly:syngo.BizLogic.Modules.Viewing.BasicImaging.Tools_iTest /build:modules.itf.main.*gc /days:21");
+                Out.Info("\t  The above one is useful to see the trending if any.");
+            }));
 
             if (!cmd.Parse(args))
             {
