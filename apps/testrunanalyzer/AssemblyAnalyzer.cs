@@ -41,7 +41,7 @@ namespace testrunanalyzer
                 var tenPrc = (max - min) / 10;
                 a.ToList().ForEach(r =>
                 {
-                    Out.Info("{2,10}- {0} {1}", r.DurationAsString, r.BuildLogLocation, new string('-', (int)((r.Duration.TotalSeconds-min)/tenPrc)));
+                    Out.Info("{2,10} {0} {1}", r.DurationAsString, r.BuildLogLocation, new string('-', Math.Max((int)((r.Duration.TotalSeconds - min) / tenPrc), 1)));
                 });
             });
         }
