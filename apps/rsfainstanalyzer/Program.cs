@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using juba.consoleapp;
@@ -22,13 +23,13 @@ namespace rsfainstanalyzer
             var analyzer = ioc.GetInstance<StepTimeAnalyzer>();
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
             cmd.Add(new Parameter(new[] { "path" }, "path (wildcards are enabled at the end)", "path to the rsfa install log", true, @"\\fors34ba.ww005.siemens.net\tfssysint$\"));
-            cmd.Add(new Command(new[] { "groupbyfile" }, "finds longest executing steps in each log files", () =>
+            cmd.Add(new Command(new[] { "top", "groupbyfile" }, "finds longest executing steps in each log files", () =>
             {
                 ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), (input) =>
                 {
                     var steps = analyzer.FindLongestSteps(input);
                     steps.ForEach(s => Out.Info("\t{0}: {1}", s.Duration, s.Step));
-                });
+                }, null);
             }));
 
             cmd.Add(new Command(new[] { "sortbytime" }, "finds longest steps of ALL matching logs", () =>
@@ -41,11 +42,21 @@ namespace rsfainstanalyzer
             cmd.Add(new Command(new[] { "scriptduration", "sd" }, "calculates the average script execution duration", () =>
             {
                 var durations = new List<TimeSpan>();
+                var dirdur = new List<TimeSpan>();
                 ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), (input) =>
                 {
                     var d = analyzer.GetScriptDuration(input);
                     //todo: remove this workaround after the time correction switch is implemented at the right place
-                    if (TimeSpan.Zero < d && d < TimeSpan.FromHours(1)) durations.Add(d);
+                    if (TimeSpan.Zero < d && d < TimeSpan.FromHours(1))
+                    {
+                        durations.Add(d);
+                        dirdur.Add(d);
+                    }
+                }, (dirname) =>
+                {
+                    if (!dirdur.Any()) return;
+                    Out.Info("Average duration in {0}: {1}", dirname.Substring(Path.GetDirectoryName(dirname).Length), TimeSpan.FromSeconds(dirdur.Average(d => d.TotalSeconds)));
+                    dirdur = new List<TimeSpan>();
                 });
                 var averageDuration = TimeSpan.FromSeconds(durations.Average(d => d.TotalSeconds));
                 Out.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), durations.Count, averageDuration);

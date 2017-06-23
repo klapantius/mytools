@@ -12,7 +12,7 @@ namespace rsfainstanalyzer
         private string[] myDirNames;
         private string myLogName;
 
-        public void Process(string path, string logname, Action<TextReader> iteratorAction)
+        public void Process(string path, string logname, Action<TextReader> fileLevelAction, Action<string> directoryLevelAction = null)
         {
             var root = Path.GetDirectoryName(path);
             var dirPattern = path.Substring(root.Length + 1);
@@ -30,13 +30,14 @@ namespace rsfainstanalyzer
                         {
 
                             Out.Log(f);
-                            iteratorAction(input);
+                            fileLevelAction(input);
                         }
                     }
                     catch (IOException)
                     {
                     }
                 });
+                if (directoryLevelAction != null) directoryLevelAction(d);
             });
         }
     }
