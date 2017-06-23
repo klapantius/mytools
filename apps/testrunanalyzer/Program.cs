@@ -56,7 +56,7 @@ namespace testrunanalyzer
 
             })).Requires("build");
             cmd.Add(new Parameter(new[] {"assembly"}, "name or regex", "specification of asked assembly", false)).BelongsTo("findassembly");
-            cmd.Add(new Command(new []{"findassembly"}, "collect the executions of a specified assembly", () =>
+            cmd.Add(new Command(new []{"teststatistic", "stat"}, "collect the executions of a specified assembly", () =>
             {
                 var a = ioc.GetInstance<AssemblyAnalyzer>();
                 a.Analyze(
