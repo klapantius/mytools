@@ -60,6 +60,8 @@ namespace rsfainstanalyzer
                 });
                 var averageDuration = TimeSpan.FromSeconds(durations.Average(d => d.TotalSeconds));
                 Out.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), durations.Count, averageDuration);
+                Out.Info("Longest RSFA install: {0}", durations.Max());
+                Out.Info("Fastest RSFA install: {0}", durations.Min());
             }));
 
             cmd.Add(new Parameter(new[] { "logname" }, "pattern", "name pattern of an rsfa install log file", false, "rsfa.install.*.log"));
