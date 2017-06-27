@@ -14,6 +14,5 @@
         {
             return basePath.EndsWith(VersionInfoFolderSubpath) ? basePath : string.Join("/", basePath.Trim('/'), VersionInfoFolderSubpath);
         }
-
     }
 }

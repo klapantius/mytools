@@ -41,9 +41,11 @@
   <ItemGroup>
     <Compile Include="Branch.cs" />
     <Compile Include="BranchFinder.cs" />
+    <Compile Include="BuildNameExtractor.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="IBranch.cs" />
     <Compile Include="IBranchFinder.cs" />
+    <Compile Include="IBuildNameExtractor.cs" />
     <Compile Include="ISourceControlProjectFinder.cs" />
     <Compile Include="IVersionInfoFinder.cs" />
     <Compile Include="IVersionInfo.cs" />

@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Basics.cs" />
+    <Compile Include="BuildNameExtractorTests.cs" />
     <Compile Include="Mock\MockedItem.cs" />
     <Compile Include="Mock\MockedChangeset.cs" />
     <Compile Include="Mock\MockedChange.cs" />
