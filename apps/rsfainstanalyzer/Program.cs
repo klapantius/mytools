@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Schema;
 
 using juba.consoleapp;
 using juba.consoleapp.CmdLine;
+
+using sybi;
 
 using SimpleInjector;
 
@@ -19,13 +22,14 @@ namespace rsfainstanalyzer
             ioc.Register<ICmdLineInterpreter, Interpreter>(Lifestyle.Singleton);
             ioc.Register<StepTimeAnalyzer, StepTimeAnalyzer>();
             ioc.Register<ILogIterator, LogIterator>();
+            ioc.Register<IBuildNameExtractor, BuildNameExtractor>();
 
             var analyzer = ioc.GetInstance<StepTimeAnalyzer>();
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
             cmd.Add(new Parameter(new[] { "path" }, "path (wildcards are enabled at the end)", "path to the rsfa install log", true, @"\\fors34ba.ww005.siemens.net\tfssysint$\"));
             cmd.Add(new Command(new[] { "top", "groupbyfile" }, "finds longest executing steps in each log files", () =>
             {
-                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), (input) =>
+                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), (input, folder) =>
                 {
                     var steps = analyzer.FindLongestSteps(input);
                     steps.ForEach(s => Out.Info("\t{0}: {1}", s.Duration, s.Step));
@@ -41,27 +45,33 @@ namespace rsfainstanalyzer
 
             cmd.Add(new Command(new[] { "scriptduration", "sd" }, "calculates the average script execution duration", () =>
             {
-                var durations = new List<TimeSpan>();
-                var dirdur = new List<TimeSpan>();
-                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), (input) =>
-                {
-                    var d = analyzer.GetScriptDuration(input);
-                    //todo: remove this workaround after the time correction switch is implemented at the right place
-                    if (TimeSpan.Zero < d && d < TimeSpan.FromHours(1))
+                var results = new List<ScriptDurationData>();
+                var dirdur = new List<ScriptDurationData>();
+                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"),
+                    (log, folder) =>
                     {
-                        durations.Add(d);
-                        dirdur.Add(d);
-                    }
-                }, (dirname) =>
-                {
-                    if (!dirdur.Any()) return;
-                    Out.Info("Average duration in {0}: {1}", dirname.Substring(Path.GetDirectoryName(dirname).Length), TimeSpan.FromSeconds(dirdur.Average(d => d.TotalSeconds)));
-                    dirdur = new List<TimeSpan>();
-                });
-                var averageDuration = TimeSpan.FromSeconds(durations.Average(d => d.TotalSeconds));
-                Out.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), durations.Count, averageDuration);
-                Out.Info("Longest RSFA install: {0}", durations.Max());
-                Out.Info("Fastest RSFA install: {0}", durations.Min());
+                        var d = ioc.GetInstance<ScriptDurationData>();
+                        d.Duration = analyzer.GetScriptDuration(log);
+                        d.DropFolder = folder;
+                        //todo: remove this workaround after the time correction switch is implemented at the right place
+                        if (TimeSpan.Zero < d.Duration && d.Duration < TimeSpan.FromHours(1))
+                        {
+                            results.Add(d);
+                            dirdur.Add(d);
+                        }
+                    },
+                    (dirname) =>
+                    {
+                        if (!dirdur.Any()) return;
+                        Out.Info("Average duration in {0}: {1}", dirname.Substring(Path.GetDirectoryName(dirname).Length), TimeSpan.FromSeconds(dirdur.Average(d => d.Duration.TotalSeconds)));
+                        dirdur.Clear();
+                    });
+                var averageDuration = TimeSpan.FromSeconds(results.Average(d => d.Duration.TotalSeconds));
+                Out.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), results.Count, averageDuration);
+                var max = results.Max();
+                var min = results.Min();
+                Out.Info("Longest RSFA install: {0} in {1} ( {2} )", max.Duration, max.BuildName, max.DropFolder);
+                Out.Info("Fastest RSFA install: {0} in {1} ( {2} )", min.Duration, min.BuildName, min.DropFolder);
             }));
 
             cmd.Add(new Parameter(new[] { "logname" }, "pattern", "name pattern of an rsfa install log file", false, "rsfa.install.*.log"));
