@@ -19,6 +19,7 @@ namespace rsfainstanalyzer
             var minDay = days > 0 ? DateTime.Today - TimeSpan.FromDays(days) : DateTime.MinValue;
             myDirNames = Directory.GetFileSystemEntries(root, dirPattern, SearchOption.TopDirectoryOnly).
                 Where(d => Directory.GetCreationTime(d) > minDay).
+                OrderBy(d => d.Substring(0, d.LastIndexOf('.'))).ThenBy(d => int.Parse(d.Substring(d.LastIndexOf('.') + 1))).
                 ToArray();
             myLogName = logname;
             Out.Info("Processing {0} build results...", myDirNames.Length);
