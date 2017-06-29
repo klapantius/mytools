@@ -12,11 +12,14 @@ namespace rsfainstanalyzer
         private string[] myDirNames;
         private string myLogName;
 
-        public void Process(string path, string logname, Action<TextReader, string> fileLevelAction, Action<string> directoryLevelAction = null)
+        public void Process(string path, string logname, int days, Action<TextReader, string> fileLevelAction, Action<string> directoryLevelAction = null)
         {
             var root = Path.GetDirectoryName(path);
             var dirPattern = path.Substring(root.Length + 1);
-            myDirNames = Directory.GetFileSystemEntries(root, dirPattern, SearchOption.TopDirectoryOnly);
+            var minDay = days > 0 ? DateTime.Today - TimeSpan.FromDays(days) : DateTime.MinValue;
+            myDirNames = Directory.GetFileSystemEntries(root, dirPattern, SearchOption.TopDirectoryOnly).
+                Where(d => Directory.GetCreationTime(d) > minDay).
+                ToArray();
             myLogName = logname;
             Out.Info("Processing {0} build results...", myDirNames.Length);
             myDirNames.ToList().ForEach(d =>

@@ -27,13 +27,16 @@ namespace rsfainstanalyzer
             var analyzer = ioc.GetInstance<StepTimeAnalyzer>();
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
             cmd.Add(new Parameter(new[] { "path" }, "path (wildcards are enabled at the end)", "path to the rsfa install log", true, @"\\fors34ba.ww005.siemens.net\tfssysint$\"));
+            cmd.Add(new Parameter(new[] { "days" }, "count", "number of days in the past from now - another way to filter", false, "0"));
             cmd.Add(new Command(new[] { "top", "groupbyfile" }, "finds longest executing steps in each log files", () =>
             {
-                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), (input, folder) =>
-                {
-                    var steps = analyzer.FindLongestSteps(input);
-                    steps.ForEach(s => Out.Info("\t{0}: {1}", s.Duration, s.Step));
-                }, null);
+                var days = cmd.Evaluate("days", Interpreter.DefaultIntConverter);
+                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), days,
+                    (input, folder) =>
+                    {
+                        var steps = analyzer.FindLongestSteps(input);
+                        steps.ForEach(s => Out.Info("\t{0}: {1}", s.Duration, s.Step));
+                    }, null);
             }));
 
             cmd.Add(new Command(new[] { "sortbytime" }, "finds longest steps of ALL matching logs", () =>
@@ -47,7 +50,8 @@ namespace rsfainstanalyzer
             {
                 var results = new List<ScriptDurationData>();
                 var dirdur = new List<ScriptDurationData>();
-                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"),
+                var days = cmd.Evaluate("days", Interpreter.DefaultIntConverter);
+                ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), days,
                     (log, folder) =>
                     {
                         var d = ioc.GetInstance<ScriptDurationData>();
