@@ -32,8 +32,7 @@ namespace rsfainstanalyzer
                     {
                         using (var input = new StreamReader(f))
                         {
-
-                            Out.Log(f);
+                            Out.Info(f);
                             fileLevelAction(input, d);
                         }
                     }

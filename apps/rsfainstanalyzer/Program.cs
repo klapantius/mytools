@@ -57,12 +57,8 @@ namespace rsfainstanalyzer
                         var d = ioc.GetInstance<ScriptDurationData>();
                         d.Duration = analyzer.GetScriptDuration(log);
                         d.DropFolder = folder;
-                        //todo: remove this workaround after the time correction switch is implemented at the right place
-                        if (TimeSpan.Zero < d.Duration && d.Duration < TimeSpan.FromHours(1))
-                        {
-                            results.Add(d);
-                            dirdur.Add(d);
-                        }
+                        results.Add(d);
+                        dirdur.Add(d);
                     },
                     (dirname) =>
                     {

@@ -20,8 +20,8 @@ namespace rsfainstanalyzer
 
             var firstLineWithTimeStamp = FindNextLineIncludingTimeStamp(input);
             string lastLineWithTimeStamp = string.Empty;
-            string line ;
-            while ((line = FindNextLineIncludingTimeStamp(input))!=null)
+            string line;
+            while ((line = FindNextLineIncludingTimeStamp(input)) != null)
             {
                 lastLineWithTimeStamp = line;
             }
@@ -43,7 +43,7 @@ namespace rsfainstanalyzer
                 var d = DifferenceBetweenLines(diffs.Last().Step, currentLine);
                 if (d > TimeSpan.FromDays(1))
                 {
-                    var x = Regex.Replace(currentLine, @"(?<first>\d{2})(?<middle>\.\d{2}\.)(?<last>\d{2})", 
+                    var x = Regex.Replace(currentLine, @"(?<first>\d{2})(?<middle>\.\d{2}\.)(?<last>\d{2})",
                         match => string.Format("{0}{1}{2}", match.Groups["last"], match.Groups["middle"], match.Groups["first"]));
                     d = DifferenceBetweenLines(diffs.Last().Step, x);
                 }
@@ -63,8 +63,27 @@ namespace rsfainstanalyzer
             var time1 = ExtractTimeStamp(line1);
             var time2 = ExtractTimeStamp(line2);
             if (time1 == DateTime.MinValue || time2 == DateTime.MinValue) return new TimeSpan(0);
-            //todo: move time correction logic with year-day switch to this place
+            if (TimeSpan.Zero > time2 - time1 || time2 - time1 > TimeSpan.FromHours(1))
+            {
+                FixDateTime(ref time1);
+                FixDateTime(ref time2);
+            }
+            if (TimeSpan.Zero > time2 - time1 || time2 - time1 > TimeSpan.FromHours(1))
+            {
+                Console.WriteLine("Possible failure:");
+                Console.WriteLine("\ttime1: {0} from \"{1}\": ", time1, line1);
+                Console.WriteLine("\ttime2: {0} from \"{1}\": ", time2, line2);
+            }
             return time2 - time1;
+        }
+
+        // this will help us until 2031
+        private void FixDateTime(ref DateTime d)
+        {
+            if (d.Year > 2000) return;
+            var day = d.Year - 1900;
+            var year = 2000 + d.Day;
+            d= new DateTime(year, d.Month, day, d.Hour, d.Minute, d.Second, d.Millisecond);
         }
 
         internal DateTime ExtractTimeStamp(string line)
