@@ -8,6 +8,7 @@ using juba.consoleapp;
 using juba.consoleapp.CmdLine;
 
 using sybi;
+using sybi.RSFA;
 
 using SimpleInjector;
 
@@ -20,11 +21,11 @@ namespace rsfainstanalyzer
         {
             var ioc = new Container();
             ioc.Register<ICmdLineInterpreter, Interpreter>(Lifestyle.Singleton);
-            ioc.Register<StepTimeAnalyzer, StepTimeAnalyzer>();
+            ioc.Register<IStepTimeAnalyzer, StepTimeAnalyzer>();
             ioc.Register<ILogIterator, LogIterator>();
             ioc.Register<IBuildNameExtractor, BuildNameExtractor>();
 
-            var analyzer = ioc.GetInstance<StepTimeAnalyzer>();
+            var analyzer = ioc.GetInstance<IStepTimeAnalyzer>();
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
             cmd.Add(new Parameter(new[] { "path" }, "path (wildcards are enabled at the end)", "path to the rsfa install log", true, @"\\fors34ba.ww005.siemens.net\tfssysint$\"));
             cmd.Add(new Parameter(new[] { "days" }, "count", "number of days in the past from now - another way to filter", false, "0"));

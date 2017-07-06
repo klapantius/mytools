@@ -3,7 +3,7 @@ using System.IO;
 
 using NUnit.Framework;
 
-using rsfainstanalyzer;
+using sybi.RSFA;
 
 
 namespace rsfainst_utest
@@ -14,7 +14,7 @@ namespace rsfainst_utest
         private static readonly string FirstMatchingLine = "STARTER: 16.08.27 12:00:00:000 3435/685 1st line in yymmdd format";
         private static readonly string SecondMatchingLine = "[2016.08.27 12:03:14.000 +02] bar 2nd line in datastorage format";
         private static readonly string ThirdMatchingLine = "STARTER: 27.08.16 12:05:00:000 466/3136 3rd line ddmmyy format";
-        private static readonly string SampleContent =
+        private static readonly string mySampleContent =
             "bla" + Environment.NewLine +
             FirstMatchingLine + Environment.NewLine +
             "no timestamp here or there" + Environment.NewLine +
@@ -33,7 +33,7 @@ namespace rsfainst_utest
             {
                 var stream = new MemoryStream();
                 var writer = new StreamWriter(stream);
-                writer.Write(SampleContent);
+                writer.Write(mySampleContent);
                 writer.Flush();
                 stream.Position = 0;
                 return stream;

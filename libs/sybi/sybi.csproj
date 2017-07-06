@@ -47,9 +47,11 @@
     <Compile Include="IBranchFinder.cs" />
     <Compile Include="IBuildNameExtractor.cs" />
     <Compile Include="ISourceControlProjectFinder.cs" />
+    <Compile Include="IStepTimeAnalyzer.cs" />
     <Compile Include="IVersionInfoFinder.cs" />
     <Compile Include="IVersionInfo.cs" />
     <Compile Include="PathAndFilenameConventions.cs" />
+    <Compile Include="RSFA.cs" />
     <Compile Include="SourceControlProject.cs" />
     <Compile Include="SourceControlProjectFinder.cs" />
     <Compile Include="SybiException.cs" />
