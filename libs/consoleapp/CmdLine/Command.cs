@@ -2,18 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using juba.consoleapp.Out;
+
 
 namespace juba.consoleapp.CmdLine
 {
     public class Command: Item, ICmdLineCommand
     {
         private readonly Action myAction;
+        private readonly IConsoleAppOut myOut;
         public List<string> RequiredParams { get; private set; }
 
-        public Command(IEnumerable<string> names, string description, Action todo)
+        public Command(IEnumerable<string> names, string description, Action todo, IConsoleAppOut @out)
             :base(names, description)
         {
             myAction = todo;
+            myOut = @out;
             RequiredParams = new List<string>();
         }
 
@@ -28,8 +32,8 @@ namespace juba.consoleapp.CmdLine
             {
                 myAction();
             }
-            catch (ExceptionBase exception) { Out.Error(exception.Message); }
-            catch (Exception exception) { Out.Error(exception.ToString()); }
+            catch (ExceptionBase exception) { myOut.Error(exception.Message); }
+            catch (Exception exception) { myOut.Error(exception.ToString()); }
         }
 
         public override string Help(bool verbose)

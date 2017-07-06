@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 
 using juba.consoleapp;
+using juba.consoleapp.Out;
 
 using Microsoft.TeamFoundation.Build.Client;
 using Microsoft.TeamFoundation.TestManagement.Client;
@@ -21,10 +22,12 @@ namespace testrunanalyzer
     public class TestExecutionDataCollector : ITestExecutionDataCollector
     {
         private readonly ITestManagementTeamProject myTestManagementTeamProject;
+        private readonly IConsoleAppOut myOutput;
 
-        public TestExecutionDataCollector(ITestManagementTeamProject testManagementTeamProject)
+        public TestExecutionDataCollector(ITestManagementTeamProject testManagementTeamProject, IConsoleAppOut output)
         {
             myTestManagementTeamProject = testManagementTeamProject;
+            this.myOutput = output;
         }
 
         public List<TestExecutionData> CollectData(IBuildDetail[] builds)
@@ -32,7 +35,7 @@ namespace testrunanalyzer
             var result = new List<TestExecutionData>();
             foreach (var buildDetail in builds)
             {
-                Out.Log(buildDetail.BuildNumber);
+                myOutput.Log(buildDetail.BuildNumber);
                 var testRuns = myTestManagementTeamProject.TestRuns.ByBuild(buildDetail.Uri);
                 foreach (var testRun in testRuns)
                 {
@@ -46,7 +49,7 @@ namespace testrunanalyzer
                     var testResults = testRun.QueryResults();
                     testResults.OrderBy(r => r.DateStarted).FirstOrDefault();
                     result.Add(item);
-                    Out.Log("\t{0} {1}", item.Duration.ToString("g"), item.Assembly);
+                    myOutput.Log("\t{0} {1}", item.Duration.ToString("g"), item.Assembly);
                 }
             }
             return result;

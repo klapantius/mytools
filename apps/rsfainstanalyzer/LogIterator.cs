@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 
 using juba.consoleapp;
+using juba.consoleapp.Out;
 
 
 namespace rsfainstanalyzer
@@ -11,6 +12,12 @@ namespace rsfainstanalyzer
     {
         private string[] myDirNames;
         private string myLogName;
+        private IConsoleAppOut myOutput;
+
+        public LogIterator(IConsoleAppOut output)
+        {
+            myOutput = output;
+        }
 
         public void Process(string path, string logname, int days, Action<TextReader, string> fileLevelAction, Action<string> directoryLevelAction = null)
         {
@@ -22,7 +29,7 @@ namespace rsfainstanalyzer
                 OrderBy(d => d.Substring(0, d.LastIndexOf('.'))).ThenBy(d => int.Parse(d.Substring(d.LastIndexOf('.') + 1))).
                 ToArray();
             myLogName = logname;
-            Out.Info("Processing {0} build results...", myDirNames.Length);
+            myOutput.Info("Processing {0} build results...", myDirNames.Length);
             myDirNames.ToList().ForEach(d =>
             {
                 var fnames = Directory.GetFileSystemEntries(d, myLogName, SearchOption.AllDirectories);
@@ -32,7 +39,7 @@ namespace rsfainstanalyzer
                     {
                         using (var input = new StreamReader(f))
                         {
-                            Out.Info(f);
+                            myOutput.Info(f);
                             fileLevelAction(input, d);
                         }
                     }

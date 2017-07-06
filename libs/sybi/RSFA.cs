@@ -6,13 +6,20 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using juba.consoleapp;
+using juba.consoleapp.Out;
 
 
 namespace sybi.RSFA
 {
     public class StepTimeAnalyzer : IStepTimeAnalyzer
     {
+        private readonly IConsoleAppOut myOutput;
         internal static readonly Regex TimeStampRegex = new Regex(@"\d{2,4}[\.-]\d{2}[\.-]\d{2}[\s+,_]\d{2}:\d{2}:\d{2}([:\.]\d+)*\s");
+
+        public StepTimeAnalyzer(IConsoleAppOut output)
+        {
+            myOutput = output;
+        }
 
         public TimeSpan GetScriptDuration(TextReader input)
         {
@@ -26,7 +33,7 @@ namespace sybi.RSFA
                 lastLineWithTimeStamp = line;
             }
             var diff = DifferenceBetweenLines(firstLineWithTimeStamp, lastLineWithTimeStamp);
-            Out.Log("\t{0}", diff);
+            myOutput.Log("\t{0}", diff);
             return diff;
         }
 

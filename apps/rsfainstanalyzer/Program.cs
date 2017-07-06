@@ -6,6 +6,7 @@ using System.Xml.Schema;
 
 using juba.consoleapp;
 using juba.consoleapp.CmdLine;
+using juba.consoleapp.Out;
 
 using sybi;
 using sybi.RSFA;
@@ -24,7 +25,9 @@ namespace rsfainstanalyzer
             ioc.Register<IStepTimeAnalyzer, StepTimeAnalyzer>();
             ioc.Register<ILogIterator, LogIterator>();
             ioc.Register<IBuildNameExtractor, BuildNameExtractor>();
+            ioc.Register<IConsoleAppOut, ConsoleOut>(Lifestyle.Singleton);
 
+            var myOut = ioc.GetInstance<IConsoleAppOut>();
             var analyzer = ioc.GetInstance<IStepTimeAnalyzer>();
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
             cmd.Add(new Parameter(new[] { "path" }, "path (wildcards are enabled at the end)", "path to the rsfa install log", true, @"\\fors34ba.ww005.siemens.net\tfssysint$\"));
@@ -36,13 +39,13 @@ namespace rsfainstanalyzer
                     (input, folder) =>
                     {
                         var steps = analyzer.FindLongestSteps(input);
-                        steps.ForEach(s => Out.Info("\t{0}: {1}", s.Duration, s.Step));
+                        steps.ForEach(s => myOut.Info("\t{0}: {1}", s.Duration, s.Step));
                     }, null);
             }));
 
             cmd.Add(new Command(new[] { "sortbytime" }, "finds longest steps of ALL matching logs", () =>
             {
-                Out.Error("This is not available yet.");
+                myOut.Error("This is not available yet.");
                 //var results = new List<StepTimeAnalyzer.Result>();
                 //results.AddRange(steps);
             }));
@@ -64,15 +67,15 @@ namespace rsfainstanalyzer
                     (dirname) =>
                     {
                         if (!dirdur.Any()) return;
-                        Out.Info("Average duration in {0}: {1}", dirname.Substring(Path.GetDirectoryName(dirname).Length), TimeSpan.FromSeconds(dirdur.Average(d => d.Duration.TotalSeconds)));
+                        myOut.Info("Average duration in {0}: {1}", dirname.Substring(Path.GetDirectoryName(dirname).Length), TimeSpan.FromSeconds(dirdur.Average(d => d.Duration.TotalSeconds)));
                         dirdur.Clear();
                     });
                 var averageDuration = TimeSpan.FromSeconds(results.Average(d => d.Duration.TotalSeconds));
-                Out.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), results.Count, averageDuration);
+                myOut.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), results.Count, averageDuration);
                 var max = results.Max();
                 var min = results.Min();
-                Out.Info("Longest RSFA install: {0} in {1} ( {2} )", max.Duration, max.BuildName, max.DropFolder);
-                Out.Info("Fastest RSFA install: {0} in {1} ( {2} )", min.Duration, min.BuildName, min.DropFolder);
+                myOut.Info("Longest RSFA install: {0} in {1} ( {2} )", max.Duration, max.BuildName, max.DropFolder);
+                myOut.Info("Fastest RSFA install: {0} in {1} ( {2} )", min.Duration, min.BuildName, min.DropFolder);
             }));
 
             cmd.Add(new Parameter(new[] { "logname" }, "pattern", "name pattern of an rsfa install log file", false, "rsfa.install.*.log"));
@@ -89,7 +92,7 @@ namespace rsfainstanalyzer
                 }
                 return;
             }
-            Out.VerbosityLevel = cmd.Evaluate("verbose", Interpreter.DefaultBoolConverter) ? 1 : 0;
+            myOut.VerbosityLevel = cmd.Evaluate("verbose", Interpreter.DefaultBoolConverter) ? 1 : 0;
 
             cmd.ExecuteCommands();
 

@@ -8,6 +8,8 @@ using juba.tfs.wrappers;
 using SimpleInjector;
 
 using juba.consoleapp.CmdLine;
+using juba.consoleapp.Out;
+
 using Command = juba.consoleapp.CmdLine.Command;
 
 
@@ -19,6 +21,7 @@ namespace testrunanalyzer
         {
             var ioc = new Container();
             ioc.Register<ICmdLineInterpreter, Interpreter>(Lifestyle.Singleton);
+            ioc.Register<IConsoleAppOut, ConsoleOut>(Lifestyle.Singleton);
             ioc.Register(() => new Uri(ioc.GetInstance<ICmdLineInterpreter>().ValueOf("tpc")), Lifestyle.Singleton);
             ioc.Register<ITfsTeamProjectCollection, TfsTeamProjectCollectionWrapper>(Lifestyle.Singleton);
             ioc.Register(() => ioc.GetInstance<ITfsTeamProjectCollection>().GetService<IBuildServer>());
@@ -28,6 +31,7 @@ namespace testrunanalyzer
             ioc.Register<TestExecutionAnalyzer>();
             ioc.Register<AssemblyAnalyzer>();
 
+            var output = ioc.GetInstance<IConsoleAppOut>();
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
             cmd.Add(new Parameter(new[] { "teamproject", "tp" }, "name", "team project name", false, "syngo.net"));
             cmd.Add(new Parameter(new[] { "teamprojectcollection", "tpc" }, "uri", "team project collection uri", false, "https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"));
@@ -70,12 +74,12 @@ namespace testrunanalyzer
             })).Requires("build", "assembly");
             cmd.Add(new Command(new []{"usage"}, "further help", () =>
             {
-                Out.Info("Usage:");
-                Out.Info("\t- Find long runners of a module. Example: testrunanalyzer /top10 /build:modules.foundations.main.*gc /days:21");
-                Out.Info("\t- Find the longest runners at all. Example: testrunanalyzer /top10 /build:modules.*.main.*gc /days:30 /extendedoutput");
-                Out.Info("\t  The above one displays the durations taken in count too.");
-                Out.Info("\t- Display the execution durations of a test. Example: testrunanalyzer /findassembly /assembly:syngo.BizLogic.Modules.Viewing.BasicImaging.Tools_iTest /build:modules.itf.main.*gc /days:21");
-                Out.Info("\t  The above one is useful to see the trending if any.");
+                Console.WriteLine("Usage:");
+                Console.WriteLine("\t- Find long runners of a module. Example: testrunanalyzer /top10 /build:modules.foundations.main.*gc /days:21");
+                Console.WriteLine("\t- Find the longest runners at all. Example: testrunanalyzer /top10 /build:modules.*.main.*gc /days:30 /extendedoutput");
+                Console.WriteLine("\t  The above one displays the durations taken in count too.");
+                Console.WriteLine("\t- Display the execution durations of a test. Example: testrunanalyzer /findassembly /assembly:syngo.BizLogic.Modules.Viewing.BasicImaging.Tools_iTest /build:modules.itf.main.*gc /days:21");
+                Console.WriteLine("\t  The above one is useful to see the trending if any.");
             }));
 
             if (!cmd.Parse(args))
@@ -88,7 +92,7 @@ namespace testrunanalyzer
                 }
                 return;
             }
-            Out.VerbosityLevel = cmd.Evaluate("verbose", Interpreter.DefaultBoolConverter) ? 1 : 0;
+            output.VerbosityLevel = cmd.Evaluate("verbose", Interpreter.DefaultBoolConverter) ? 1 : 0;
 
             cmd.ExecuteCommands();
 

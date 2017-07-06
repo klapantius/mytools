@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using juba.consoleapp;
+using juba.consoleapp.Out;
 
 using Microsoft.TeamFoundation.Build.Client;
 
@@ -13,11 +14,13 @@ namespace testrunanalyzer
     {
         private readonly IBuildServer myBuildServer;
         private readonly ITestExecutionDataCollector myDataCollector;
+        private readonly IConsoleAppOut myOut;
 
-        public TestExecutionAnalyzer(IBuildServer buildServer, ITestExecutionDataCollector dataCollector)
+        public TestExecutionAnalyzer(IBuildServer buildServer, ITestExecutionDataCollector dataCollector, IConsoleAppOut @out)
         {
             myBuildServer = buildServer;
             myDataCollector = dataCollector;
+            myOut = @out;
         }
 
         public void Analyze(string teamProjectName, string buildSpec, int days, int threshold, int peakfilter, bool extendedoutput)
@@ -49,8 +52,8 @@ namespace testrunanalyzer
                 .ForEach(g =>
                 {
                     var i = g.OrderByDescending(r => r.Duration.TotalMinutes).ToList();
-                    Out.Info("\t{0}\t{1}", i.First(), myDataCollector.GetDropFolder(i.First()));
-                    if (extendedoutput) Out.Info("\t\t  ({0})", string.Join(", ", i.Select(r => r.Duration.ToString("g"))));
+                    myOut.Info("\t{0}\t{1}", i.First(), myDataCollector.GetDropFolder(i.First()));
+                    if (extendedoutput) myOut.Info("\t\t  ({0})", string.Join(", ", i.Select(r => r.Duration.ToString("g"))));
                 });
         }
 

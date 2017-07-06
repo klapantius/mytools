@@ -5,6 +5,9 @@ using SimpleInjector;
 using System;
 using System.IO;
 using System.Linq;
+
+using juba.consoleapp.Out;
+
 using sybi;
 using CmdLine = juba.consoleapp.CmdLine;
 
@@ -14,6 +17,7 @@ namespace fixtrax
     {
         private static void Main(string[] args)
         {
+            var output = new ConsoleOut();
             var i = new CmdLine.Interpreter();
             i.Add(new CmdLine.Parameter(new[] { "changeset", "cs" }, "CS id", "changeset to track", false));
             i.Add(new CmdLine.Parameter(new[] { "module", "mb" }, "path", "module branch to find changes (e.G. Core/PCP/v4) on it", false));
@@ -27,7 +31,7 @@ namespace fixtrax
                 i.PrintErrors("push.exe");
                 return;
             }
-            Out.VerbosityLevel = bool.Parse(i.ValueOf("verbose")) ? 1 : 0;
+            output.VerbosityLevel = bool.Parse(i.ValueOf("verbose")) ? 1 : 0;
 
             var ioc = new Container();
             ioc.Register(() => new Uri("https://tfs.healthcare.siemens.com:8090/tfs/ikm.tpc.projects"), Lifestyle.Singleton);
@@ -48,7 +52,7 @@ namespace fixtrax
                 {
                     var csid = i.Evaluate<int>("changeset", CmdLine.Interpreter.DefaultIntConverter,
                       (x) => { if (x <= 0) throw new Exception("The specified changeset id is not valid"); });
-                    tracker.TrackCS(csid, dsName);
+                    tracker.TrackCS(csid, dsName, output);
                     return;
                 }
 
@@ -56,8 +60,8 @@ namespace fixtrax
                 {
                     var days = i.Evaluate<int>("days", CmdLine.Interpreter.DefaultIntConverter,
                       (x) => { if (x <= 0) throw new Exception("The specified number of days is not valid"); });
-                    if (i.IsSpecified("module")) tracker.TrackModuleChanges(i.ValueOf("module"), days, dsName);
-                    else tracker.TrackModuleChangesFromInputFile(i.ValueOf("modules"), days, dsName);
+                    if (i.IsSpecified("module")) tracker.TrackModuleChanges(i.ValueOf("module"), days, dsName, output);
+                    else tracker.TrackModuleChangesFromInputFile(i.ValueOf("modules"), days, dsName, output);
                     return;
                 }
 
@@ -65,7 +69,7 @@ namespace fixtrax
                 {
                     var workitem = i.Evaluate<int>("workitem", CmdLine.Interpreter.DefaultIntConverter,
                       (x) => { if (x <= 0) throw new Exception("The specified workitem id is not valid"); });
-                    tracker.TrackWorkitem(workitem, dsName);
+                    tracker.TrackWorkitem(workitem, dsName, output);
                     Console.WriteLine("done");
                     Console.ReadKey();
                     return;
@@ -75,7 +79,7 @@ namespace fixtrax
             catch (Exception e)
             {
                 Console.WriteLine("{0} caught: {1}", e.GetType().Name, e.Message);
-                Out.Log(e.ToString());
+                output.Log(e.ToString());
             }
         }
 
@@ -104,41 +108,41 @@ namespace fixtrax
             myLinkedChangesetsExtractor = lce;
         }
 
-        internal void TrackWorkitem(int workitem, string dsName)
+        internal void TrackWorkitem(int workitem, string dsName, IConsoleAppOut output)
         {
-            Out.Log("called TrackWorkitem({0}, {1})", workitem, dsName);
+            output.Log("called TrackWorkitem({0}, {1})", workitem, dsName);
             var wi = myWorkItemStore.GetWorkItem(workitem);
             Console.WriteLine(wi.ToString());
             foreach (var cs in myLinkedChangesetsExtractor.GetChangesets(wi).ToList())
             {
-                TrackCS(cs.ChangesetId, dsName);
+                TrackCS(cs.ChangesetId, dsName, output);
             }
         }
 
-        public void TrackModuleChangesFromInputFile(string moduleFile, int days, string dsName)
+        public void TrackModuleChangesFromInputFile(string moduleFile, int days, string dsName, IConsoleAppOut output)
         {
             using (var f = new StreamReader(new FileStream(moduleFile, FileMode.Open, FileAccess.Read)))
             {
                 while (!f.EndOfStream)
                 {
                     var moduleBranch = f.ReadLine();
-                    TrackModuleChanges(moduleBranch, days, dsName);
+                    TrackModuleChanges(moduleBranch, days, dsName, output);
                 }
             }
         }
 
-        public void TrackModuleChanges(string moduleBranch, int days, string dsName)
+        public void TrackModuleChanges(string moduleBranch, int days, string dsName, IConsoleAppOut output)
         {
             // load history of the module for the specified number of days
             myVersionControlServer.QueryHistory(string.Join("/", ModulesRootPath, moduleBranch), true, true, DateTime.Today - TimeSpan.FromDays(days), false)
                 .ToList()
                 .ForEach(c =>
                 {
-                    if (c.WorkItems.Any()) TrackCS(c.ChangesetId, dsName);
+                    if (c.WorkItems.Any()) TrackCS(c.ChangesetId, dsName, output);
                 });
         }
 
-        public void TrackCS(int csid, string dsAndBranchName)
+        public void TrackCS(int csid, string dsAndBranchName, IConsoleAppOut output)
         {
             // idnetify the source control project based on the specified CS
             var cs = myVersionControlServer.GetChangeset(csid);
@@ -155,9 +159,9 @@ namespace fixtrax
                 PrintTrackingResult(cs, sourceScp.Name, null, dsAndBranchName, null);
                 return;
             }
-            Out.Log("{1} CS {0} identified as subsequent version upload", sourceVersion.Item.ChangesetId, sourceVersion.Item.ServerItem);
+            output.Log("{1} CS {0} identified as subsequent version upload", sourceVersion.Item.ChangesetId, sourceVersion.Item.ServerItem);
             var elapsedTime = sourceVersion.Item.CheckinDate - cs.CreationDate;
-            Out.Log("{1} {2} (C{3}{4})",
+            output.Log("{1} {2} (C{3}{4})",
                 csid, sourceScp.Name, sourceVersion.Id, sourceVersion.Item.ChangesetId,
                 elapsedTime < TimeSpan.FromHours(2) ? string.Format(" +{0}", elapsedTime) : "");
 

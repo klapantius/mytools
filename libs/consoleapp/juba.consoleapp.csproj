@@ -46,9 +46,12 @@
     <Compile Include="CmdLine\ICmdLineCommand.cs" />
     <Compile Include="CmdLine\Item.cs" />
     <Compile Include="CmdLine\Parameter.cs" />
+    <Compile Include="Out\ConsoleAppDefaultOut.cs" />
+    <Compile Include="Out\ConsoleOut.cs" />
     <Compile Include="ExceptionBase.cs" />
     <Compile Include="CmdLine\ICmdLineInterpreter.cs" />
-    <Compile Include="Out.cs" />
+    <Compile Include="Out\IConsoleAppOut.cs" />
+    <Compile Include="Out\TextFileOut.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

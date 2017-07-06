@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using juba.consoleapp;
+using juba.consoleapp.Out;
 
 using Microsoft.TeamFoundation.Build.Client;
 
@@ -13,11 +14,13 @@ namespace testrunanalyzer
     {
         private readonly IBuildServer myBuildServer;
         private readonly ITestExecutionDataCollector myDataCollector;
+        private readonly IConsoleAppOut myOut;
 
-        public AssemblyAnalyzer(IBuildServer buildServer, ITestExecutionDataCollector dataCollector)
+        public AssemblyAnalyzer(IBuildServer buildServer, ITestExecutionDataCollector dataCollector, IConsoleAppOut @out)
         {
             myBuildServer = buildServer;
             myDataCollector = dataCollector;
+            myOut = @out;
         }
 
         public void Analyze(string teamProjectName, string buildSpec, int days, string assemblyspec)
@@ -35,13 +38,13 @@ namespace testrunanalyzer
             var groupedByAssemblies = data.GroupBy(d => d.Assembly).ToList();
             groupedByAssemblies.ForEach(a =>
             {
-                Out.Info("{0} ({1} results)", a.Key, a.Count());
+                myOut.Info("{0} ({1} results)", a.Key, a.Count());
                 var max = a.Max(r => r.Duration.TotalSeconds);
                 var min = a.Min(r => r.Duration.TotalSeconds);
                 var tenPrc = (max - min) / 10;
                 a.ToList().ForEach(r =>
                 {
-                    Out.Info("{2,10} {0} {1}", r.DurationAsString, myDataCollector.GetDropFolder(r), new string('-', Math.Max((int)((r.Duration.TotalSeconds - min) / tenPrc), 1)));
+                    myOut.Info("{2,10} {0} {1}", r.DurationAsString, myDataCollector.GetDropFolder(r), new string('-', Math.Max((int)((r.Duration.TotalSeconds - min) / tenPrc), 1)));
                 });
             });
         }
