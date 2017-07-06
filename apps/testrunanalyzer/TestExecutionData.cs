@@ -1,11 +1,14 @@
 using System;
+using System.Linq;
+
+using juba.consoleapp;
 
 using Microsoft.TeamFoundation.TestManagement.Client;
 
 
 namespace testrunanalyzer
 {
-    public struct TestExecutionData
+    public class TestExecutionData
     {
         public string Build;
         public string BuildDefinition;
@@ -20,13 +23,25 @@ namespace testrunanalyzer
                     "n/a";
             }
         }
+
+        private TimeSpan myDuration = TimeSpan.MinValue;
         public TimeSpan Duration
         {
             get
             {
-                return TestRun != null ?
-                    TestRun.DateCompleted - TestRun.DateStarted :
-                    new TimeSpan(0);
+                if (myDuration != TimeSpan.MinValue) return myDuration;
+                if (TestRun != null)
+                {
+                    var testResults = TestRun.QueryResults(false);
+                    if (testResults != null)
+                    {
+                        var start = testResults.OrderBy(r => r.DateStarted).First().DateStarted;
+                        if (start != DateTime.MinValue)
+                            myDuration = TestRun.DateCompleted - start.ToUniversalTime();
+                    }
+                }
+                if (myDuration == TimeSpan.MinValue) myDuration = TestRun != null ? TestRun.DateCompleted - TestRun.DateStarted : TimeSpan.Zero;
+                return myDuration;
             }
         }
 

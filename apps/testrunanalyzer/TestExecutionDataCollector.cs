@@ -43,6 +43,8 @@ namespace testrunanalyzer
                         TestRun = testRun,
                         BuildLogLocation = Path.GetDirectoryName(buildDetail.LogLocation),
                     };
+                    var testResults = testRun.QueryResults();
+                    testResults.OrderBy(r => r.DateStarted).FirstOrDefault();
                     result.Add(item);
                     Out.Log("\t{0} {1}", item.Duration.ToString("g"), item.Assembly);
                 }
