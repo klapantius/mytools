@@ -32,8 +32,8 @@ namespace testrunanalyzer
             spec.MinFinishTime = DateTime.Today - TimeSpan.FromDays(days - 1);
             spec.QueryOrder = BuildQueryOrder.FinishTimeDescending;
 
-            var result = myDataCollector.CollectData(myBuildServer.QueryBuilds(spec).Builds);
             var asss = new Regex(assemblyspec, RegexOptions.IgnoreCase);
+            var result = myDataCollector.CollectData(myBuildServer.QueryBuilds(spec).Builds, asss);
             var data = result.Where(d => asss.IsMatch(d.Assembly)).ToList();
             var groupedByAssemblies = data.GroupBy(d => d.Assembly).ToList();
             groupedByAssemblies.ForEach(a =>

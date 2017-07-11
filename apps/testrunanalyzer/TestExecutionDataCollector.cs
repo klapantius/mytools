@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-using juba.consoleapp;
 using juba.consoleapp.Out;
 
 using Microsoft.TeamFoundation.Build.Client;
@@ -16,6 +17,7 @@ namespace testrunanalyzer
     public interface ITestExecutionDataCollector
     {
         List<TestExecutionData> CollectData(IBuildDetail[] builds);
+        List<TestExecutionData> CollectData(IBuildDetail[] builds, Regex assemblySpec);
         string GetDropFolder(TestExecutionData data);
     }
 
@@ -32,6 +34,11 @@ namespace testrunanalyzer
 
         public List<TestExecutionData> CollectData(IBuildDetail[] builds)
         {
+            return CollectData(builds, null);
+        }
+
+        public List<TestExecutionData> CollectData(IBuildDetail[] builds, Regex assemblySpec)
+        {
             var result = new List<TestExecutionData>();
             foreach (var buildDetail in builds)
             {
@@ -46,10 +53,13 @@ namespace testrunanalyzer
                         TestRun = testRun,
                         BuildLogLocation = Path.GetDirectoryName(buildDetail.LogLocation),
                     };
-                    var testResults = testRun.QueryResults();
-                    testResults.OrderBy(r => r.DateStarted).FirstOrDefault();
-                    result.Add(item);
-                    myOutput.Log("\t{0} {1}", item.Duration.ToString("g"), item.Assembly);
+                    if (assemblySpec==null || assemblySpec.IsMatch(item.Assembly))
+                    {
+                        var testResults = testRun.QueryResults();
+                        testResults.OrderBy(r => r.DateStarted).FirstOrDefault();
+                        result.Add(item);
+                        myOutput.Log("\t{0} {1}", item.Duration.ToString("g"), item.Assembly);
+                    }
                 }
             }
             return result;
