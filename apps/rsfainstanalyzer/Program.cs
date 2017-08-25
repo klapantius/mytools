@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Schema;
@@ -32,7 +33,7 @@ namespace rsfainstanalyzer
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
             cmd.Add(new Parameter(new[] { "path" }, "path (wildcards are enabled at the end)", "path to the rsfa install log", true, @"\\fors34ba.ww005.siemens.net\tfssysint$\"));
             cmd.Add(new Parameter(new[] { "days" }, "count", "number of days in the past from now - another way to filter", false, "0"));
-            cmd.Add(new Command(new[] { "top", "groupbyfile" }, "finds longest executing steps in each log files", () =>
+            cmd.Add(new Command(new[] { "top" }, "finds longest executing steps in each log files", () =>
             {
                 var days = cmd.Evaluate("days", Interpreter.DefaultIntConverter);
                 ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), days,
@@ -43,18 +44,19 @@ namespace rsfainstanalyzer
                     }, null);
             }));
 
-            cmd.Add(new Command(new[] { "sortbytime" }, "finds longest steps of ALL matching logs", () =>
-            {
-                myOut.Error("This is not available yet.");
-                //var results = new List<StepTimeAnalyzer.Result>();
-                //results.AddRange(steps);
-            }));
+            //cmd.Add(new Command(new[] { "sortbytime" }, "finds longest steps of ALL matching logs", () =>
+            //{
+            //    myOut.Error("This is not available yet.");
+            //    //var results = new List<StepTimeAnalyzer.Result>();
+            //    //results.AddRange(steps);
+            //}));
 
             cmd.Add(new Command(new[] { "scriptduration", "sd" }, "calculates the average script execution duration", () =>
             {
                 var results = new List<ScriptDurationData>();
                 var dirdur = new List<ScriptDurationData>();
                 var days = cmd.Evaluate("days", Interpreter.DefaultIntConverter);
+                var jsonout = cmd.Evaluate("json", Interpreter.DefaultBoolConverter);
                 ioc.GetInstance<ILogIterator>().Process(cmd.ValueOf("path"), cmd.ValueOf("logname"), days,
                     (log, folder) =>
                     {
@@ -71,12 +73,20 @@ namespace rsfainstanalyzer
                         dirdur.Clear();
                     });
                 var averageDuration = TimeSpan.FromSeconds(results.Average(d => d.Duration.TotalSeconds));
-                myOut.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), results.Count, averageDuration);
                 var max = results.Max();
                 var min = results.Min();
-                myOut.Info("Longest RSFA install: {0} in {1} ( {2} )", max.Duration, max.BuildName, max.DropFolder);
-                myOut.Info("Fastest RSFA install: {0} in {1} ( {2} )", min.Duration, min.BuildName, min.DropFolder);
+                if (!jsonout)
+                {
+                    myOut.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), results.Count, averageDuration.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture));
+                    myOut.Info("Longest RSFA install: {0} in {1} ( {2} )", max.Duration, max.BuildName, max.DropFolder);
+                    myOut.Info("Fastest RSFA install: {0} in {1} ( {2} )", min.Duration, min.BuildName, min.DropFolder);
+                }
+                else
+                {
+                    myOut.Info("{{\"avgtxt\": \"{0}\", \"max\": \"{1}\", \"maxlink\": \"{2}\", \"min\": \"{3}\", \"minlink\": \"{4}\", \"avgraw\": {5}}}", averageDuration.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture), max.Duration, "dropfolder1", min.Duration, "drop2", Math.Round(averageDuration.TotalSeconds));
+                }
             }));
+            cmd.Add(new Parameter(new[] { "json", "jsonout" }, "option", "machine output for further processing", false, "false")).BelongsTo("scriptduration");
 
             cmd.Add(new Parameter(new[] { "logname" }, "pattern", "name pattern of an rsfa install log file", false, "rsfa.install.*.log"));
             cmd.Add(new Parameter(new[] { "verbose", "v" }, "bool", "verbose mode - lists all builds and executions while collecting them", false, "false"));
