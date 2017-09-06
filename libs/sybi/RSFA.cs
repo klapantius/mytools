@@ -15,10 +15,12 @@ namespace sybi.RSFA
     {
         private readonly IConsoleAppOut myOutput;
         internal static readonly Regex TimeStampRegex = new Regex(@"\d{2,4}[\.-]\d{2}[\.-]\d{2}[\s+,_]\d{2}:\d{2}:\d{2}([:\.]\d+)*\s");
+        public bool ThrowExceptionOnError { get; set; }
 
         public StepTimeAnalyzer(IConsoleAppOut output)
         {
             myOutput = output;
+            ThrowExceptionOnError = false;
         }
 
         public TimeSpan GetScriptDuration(TextReader input)
@@ -80,6 +82,10 @@ namespace sybi.RSFA
             }
             if (TimeSpan.Zero > time2 - time1 || time2 - time1 > TimeSpan.FromHours(1))
             {
+                if (ThrowExceptionOnError)
+                {
+                    throw new RSFADurationCalculationException("Possible failure{0}: {1} --> {2}", datefixed ? " (despite fix)" : "", time1, time2);
+                }
                 Console.WriteLine("Possible failure{0}:", datefixed ? " (despite fix)" : "");
                 Console.WriteLine("\ttime1: {0} from \"{1}\": ", time1, line1);
                 Console.WriteLine("\ttime2: {0} from \"{1}\": ", time2, line2);

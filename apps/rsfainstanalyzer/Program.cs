@@ -23,13 +23,14 @@ namespace rsfainstanalyzer
         {
             var ioc = new Container();
             ioc.Register<ICmdLineInterpreter, Interpreter>(Lifestyle.Singleton);
-            ioc.Register<IStepTimeAnalyzer, StepTimeAnalyzer>();
+            ioc.Register<IStepTimeAnalyzer, StepTimeAnalyzer>(Lifestyle.Singleton);
             ioc.Register<ILogIterator, LogIterator>();
             ioc.Register<IBuildNameExtractor, BuildNameExtractor>();
             ioc.Register<IConsoleAppOut, ConsoleOut>(Lifestyle.Singleton);
 
             var myOut = ioc.GetInstance<IConsoleAppOut>();
             var analyzer = ioc.GetInstance<IStepTimeAnalyzer>();
+            analyzer.ThrowExceptionOnError = true;
             var cmd = ioc.GetInstance<ICmdLineInterpreter>();
             cmd.Add(new Parameter(new[] { "path" }, "path (wildcards are enabled at the end)", "path to the rsfa install log", true, @"\\fors34ba.ww005.siemens.net\tfssysint$\"));
             cmd.Add(new Parameter(new[] { "days" }, "count", "number of days in the past from now - another way to filter", false, "0"));
@@ -61,10 +62,16 @@ namespace rsfainstanalyzer
                     (log, folder) =>
                     {
                         var d = ioc.GetInstance<ScriptDurationData>();
-                        d.Duration = analyzer.GetScriptDuration(log);
-                        d.DropFolder = folder;
-                        results.Add(d);
-                        dirdur.Add(d);
+                        try
+                        {
+                            d.Duration = analyzer.GetScriptDuration(log);
+                            d.DropFolder = folder;
+                            results.Add(d);
+                            dirdur.Add(d);
+                        }
+                        catch (RSFADurationCalculationException)
+                        {
+                        }
                     },
                     (dirname) =>
                     {
