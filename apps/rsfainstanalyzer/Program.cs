@@ -72,18 +72,24 @@ namespace rsfainstanalyzer
                         myOut.Info("Average duration in {0}: {1}", dirname.Substring(Path.GetDirectoryName(dirname).Length), TimeSpan.FromSeconds(dirdur.Average(d => d.Duration.TotalSeconds)));
                         dirdur.Clear();
                     });
-                var averageDuration = TimeSpan.FromSeconds(results.Average(d => d.Duration.TotalSeconds));
-                var max = results.Max();
-                var min = results.Min();
-                if (!jsonout)
+                if (results.Any())
                 {
-                    myOut.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), results.Count, averageDuration.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture));
-                    myOut.Info("Longest RSFA install: {0} in {1} ( {2} )", max.Duration, max.BuildName, max.DropFolder);
-                    myOut.Info("Fastest RSFA install: {0} in {1} ( {2} )", min.Duration, min.BuildName, min.DropFolder);
+                    var averageDuration = TimeSpan.FromSeconds(results.Average(d => d.Duration.TotalSeconds));
+                    var max = results.Max();
+                    var min = results.Min();
+                    if (!jsonout)
+                    {
+                        myOut.Info("Raw average for {0} ({1} executions): {2}", cmd.ValueOf("path"), results.Count, averageDuration.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture));
+                        myOut.Info("Longest RSFA install: {0} in {1} ( {2} )", max.Duration, max.BuildName, max.DropFolder);
+                        myOut.Info("Fastest RSFA install: {0} in {1} ( {2} )", min.Duration, min.BuildName, min.DropFolder);
+                    }
+                    else
+                    {
+                        myOut.Info("{{\"avgtxt\": \"{0}\", \"max\": \"{1}\", \"maxlink\": \"{2}\", \"min\": \"{3}\", \"minlink\": \"{4}\", \"avgraw\": {5}}}", averageDuration.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture), max.Duration, "dropfolder1", min.Duration, "drop2", Math.Round(averageDuration.TotalSeconds));
+                    }
                 }
-                else
-                {
-                    myOut.Info("{{\"avgtxt\": \"{0}\", \"max\": \"{1}\", \"maxlink\": \"{2}\", \"min\": \"{3}\", \"minlink\": \"{4}\", \"avgraw\": {5}}}", averageDuration.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture), max.Duration, "dropfolder1", min.Duration, "drop2", Math.Round(averageDuration.TotalSeconds));
+                else {
+                    Console.WriteLine("no results at all");
                 }
             }));
             cmd.Add(new Parameter(new[] { "json", "jsonout" }, "option", "machine output for further processing", false, "false")).BelongsTo("scriptduration");
