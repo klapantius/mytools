@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 
+using juba.consoleapp.Out;
+
 using NUnit.Framework;
 
 using sybi.RSFA;
@@ -42,10 +44,12 @@ namespace rsfainst_utest
 
         private static StreamReader SampleReader { get { return new StreamReader(Sample); } }
 
+        private static IConsoleAppOut testOut = new ConsoleOut(); 
+
         [Test]
         public void FindLongestSteps_HappyPath()
         {
-            var sut = new StepTimeAnalyzer();
+            var sut = new StepTimeAnalyzer(testOut);
             var result = sut.FindLongestSteps(SampleReader);
             Assert.IsNotNull(result);
             Assert.AreEqual(2, result.Count, "Unexpected count of results.");
@@ -58,7 +62,7 @@ namespace rsfainst_utest
         [Test]
         public void DifferenceBetweenLines_ReturnsZeroIfFirstLineIsInvalid()
         {
-            var sut = new StepTimeAnalyzer();
+            var sut = new StepTimeAnalyzer(testOut);
             Assert.AreEqual(new TimeSpan(0), sut.DifferenceBetweenLines("invalid line", FirstMatchingLine), "Unexpected difference result while the first line is invalid.");
             Assert.AreEqual(new TimeSpan(0), sut.DifferenceBetweenLines(null, SecondMatchingLine), "Unexpected difference result while the first line is null.");
         }
@@ -66,7 +70,7 @@ namespace rsfainst_utest
         [Test]
         public void DifferenceBetweenLines_ReturnsZeroIfSecondLineIsInvalid()
         {
-            var sut = new StepTimeAnalyzer();
+            var sut = new StepTimeAnalyzer(testOut);
             Assert.AreEqual(new TimeSpan(0), sut.DifferenceBetweenLines(FirstMatchingLine, "invalid line"), "Unexpected difference result while the first line is invalid.");
             Assert.AreEqual(new TimeSpan(0), sut.DifferenceBetweenLines(SecondMatchingLine, null), "Unexpected difference result while the first line is null.");
         }
@@ -74,14 +78,14 @@ namespace rsfainst_utest
         [Test]
         public void DifferenceBetweenLines_HappyPath()
         {
-            var sut = new StepTimeAnalyzer();
+            var sut = new StepTimeAnalyzer(testOut);
             Assert.AreEqual(new TimeSpan(hours: 0, minutes: 3, seconds: 14), sut.DifferenceBetweenLines(FirstMatchingLine, SecondMatchingLine), "Unexpected difference result on the happy path.");
         }
 
         [Test]
         public void ExtractTimeStamp_HappyPathWorks()
         {
-            var sut = new StepTimeAnalyzer();
+            var sut = new StepTimeAnalyzer(testOut);
             Assert.AreEqual(new DateTime(2016, 08, 27, 12, 0, 0, 0), sut.ExtractTimeStamp(FirstMatchingLine), "Unexpected time value.");
             Assert.AreEqual(new DateTime(2016, 08, 27, 12, 3, 14, 0), sut.ExtractTimeStamp(SecondMatchingLine), "Unexpected time value.");
         }
@@ -89,7 +93,7 @@ namespace rsfainst_utest
         [Test]
         public void FindNextLine_Finds1stLine()
         {
-            var sut = new StepTimeAnalyzer();
+            var sut = new StepTimeAnalyzer(testOut);
             using (var input = SampleReader)
             {
                 var line = sut.FindNextLineIncludingTimeStamp(input);
@@ -101,7 +105,7 @@ namespace rsfainst_utest
         [Test]
         public void FindNextLine_Finds2ndLine()
         {
-            var sut = new StepTimeAnalyzer();
+            var sut = new StepTimeAnalyzer(testOut);
             using (var input = SampleReader)
             {
                 sut.FindNextLineIncludingTimeStamp(input);
@@ -114,7 +118,7 @@ namespace rsfainst_utest
         [Test]
         public void FindNextLine_ReturnsNullAtEnd()
         {
-            var sut = new StepTimeAnalyzer();
+            var sut = new StepTimeAnalyzer(testOut);
             using (var input = SampleReader)
             {
                 sut.FindNextLineIncludingTimeStamp(input);

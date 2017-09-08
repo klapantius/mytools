@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3FA1210D-4027-4F89-8F53-24A08C262281}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{7BE4831C-4C68-4C1E-9FBD-FCE465B5B187}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>rsfainst_utest</RootNamespace>
-    <AssemblyName>rsfainst_utest</AssemblyName>
+    <RootNamespace>HistoryTool</RootNamespace>
+    <AssemblyName>historytool</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -32,12 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="nunit.framework">
-      <HintPath>..\..\packages\nunit.framework.2.63.0\lib\nunit.framework.dll</HintPath>
+    <Reference Include="SimpleInjector">
+      <HintPath>..\packages\SimpleInjector.3.3.2\lib\net45\SimpleInjector.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -48,7 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="StepTimeAnalyzerTests.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -56,17 +53,17 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\apps\rsfainstanalyzer\rsfainstanalyzer.csproj">
-      <Project>{dc1c7333-0793-4b0b-abce-d5b920189265}</Project>
-      <Name>rsfainstanalyzer</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\libs\consoleapp\juba.consoleapp.csproj">
       <Project>{57B98BD1-463F-46B7-8EC2-33A6169A41F8}</Project>
       <Name>juba.consoleapp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\libs\sybi\sybi.csproj">
-      <Project>{4e8335d6-7c57-4d4d-8814-2211d01ad52e}</Project>
-      <Name>sybi</Name>
+    <ProjectReference Include="..\..\libs\juba.tfs.interfaces\juba.tfs.interfaces.csproj">
+      <Project>{D5F63CE0-82C6-4AB4-82FF-E6FD507C3ECC}</Project>
+      <Name>juba.tfs.interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\libs\tfsaccess\juba.tfs.wrappers.csproj">
+      <Project>{7F76A28E-BA50-42B1-BBA4-88A83D2732E0}</Project>
+      <Name>juba.tfs.wrappers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

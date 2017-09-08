@@ -30,13 +30,15 @@ namespace juba.tfs.wrappers
             }
         }
 
+        public string Comment { get { return CS.Comment; }}
+
         public DateTime CreationDate { get { return CS.CreationDate; } }
         public int ChangesetId { get { return CS.ChangesetId; } }
         public IWorkItem[] WorkItems { get { return CS.WorkItems.Select(wi => new WorkItemWrapper(wi)).ToArray(); } }
 
         public override string ToString()
         {
-            return string.Format("CS {0} created {1} by {2} ({3}): {4}", CS.ChangesetId, CS.CreationDate, CS.OwnerDisplayName, CS.Owner, CS.Comment);
+            return string.Format("CS {0} created {1} by {2} ({3}): {4}", CS.ChangesetId, CS.CreationDate, CS.OwnerDisplayName, CS.Owner, CS.Comment.Replace(Environment.NewLine, ""));
         }
         
     }

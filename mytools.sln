@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rsfainstanalyzer", "apps\rs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "rsfainst_utest", "tests\rsfainst_utest\rsfainst_utest.csproj", "{3FA1210D-4027-4F89-8F53-24A08C262281}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "historytool", "apps\historytool\historytool.csproj", "{7BE4831C-4C68-4C1E-9FBD-FCE465B5B187}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,6 +88,10 @@ Global
 		{3FA1210D-4027-4F89-8F53-24A08C262281}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FA1210D-4027-4F89-8F53-24A08C262281}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FA1210D-4027-4F89-8F53-24A08C262281}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BE4831C-4C68-4C1E-9FBD-FCE465B5B187}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BE4831C-4C68-4C1E-9FBD-FCE465B5B187}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BE4831C-4C68-4C1E-9FBD-FCE465B5B187}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BE4831C-4C68-4C1E-9FBD-FCE465B5B187}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,5 +109,6 @@ Global
 		{DBCDE402-D958-4823-AC57-C057DCBFBE0C} = {B7426544-ED36-4E47-B6CE-43E9FF869507}
 		{DC1C7333-0793-4B0B-ABCE-D5B920189265} = {B7426544-ED36-4E47-B6CE-43E9FF869507}
 		{3FA1210D-4027-4F89-8F53-24A08C262281} = {1AD8466B-90EE-4879-A490-5C4FA4828A87}
+		{7BE4831C-4C68-4C1E-9FBD-FCE465B5B187} = {B7426544-ED36-4E47-B6CE-43E9FF869507}
 	EndGlobalSection
 EndGlobal

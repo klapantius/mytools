@@ -8,6 +8,7 @@ namespace juba.tfs.interfaces
         DateTime CreationDate { get; }
         int ChangesetId { get; }
         IWorkItem[] WorkItems { get; }
+        string Comment { get; }
     }
 
 }

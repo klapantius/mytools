@@ -90,5 +90,17 @@ namespace sybi_utest
                 myWorkItems = value;
             }
         }
+
+        private string myComment;
+
+        public string Comment
+        {
+            get { return myComment;}
+            set
+            {
+                m.Setup(foo => foo.Comment).Returns(value);
+                myComment = value;
+            }
+        }
     }
 }
