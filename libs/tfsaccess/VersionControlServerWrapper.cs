@@ -61,6 +61,16 @@ namespace juba.tfs.wrappers
             };
             return VCS.QueryHistory(qhp).Select(c => new ChangesetWrapper(c));
         }
+
+        public PendingSet[] QueryShelvedChanges(string shelvesetName, string shelvesetOwner)
+        {
+            return VCS.QueryShelvedChanges(shelvesetName, shelvesetOwner);
+        }
+
+        public Shelveset[] QueryShelvesets(string shelvesetName, string shelvesetOwner)
+        {
+            return VCS.QueryShelvesets(shelvesetName, shelvesetOwner);
+        }
     }
 
 }

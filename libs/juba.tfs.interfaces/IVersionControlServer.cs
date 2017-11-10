@@ -11,6 +11,8 @@ namespace juba.tfs.interfaces
         IItemSet GetItems(string path);
         IEnumerable<IChangeset> QueryHistory(string itemSpec, bool fullRecursion, bool sortAscending, DateTime dateVersionStart, bool includeChanges);
         IEnumerable<IChangeset> QueryHistory(string itemSpec, bool fullRecursion, bool sortAscending, IChangeset changeSet, bool includeChanges);
+        Shelveset[] QueryShelvesets(string shelvesetName, string shelvesetOwner);
+        PendingSet[] QueryShelvedChanges(string shelvesetName, string shelvesetOwner);
     }
 
 }
