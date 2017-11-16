@@ -7,7 +7,10 @@ using Microsoft.TeamFoundation.VersionControl.Client;
 using SimpleInjector;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace CleanQueue
 {
@@ -50,13 +53,14 @@ namespace CleanQueue
                     var s = new ShelvesetInfo(vcs, qb);
                     shelvesets.Add(s);
                     myOut.Info($"{qb.Id}\t{qb.RequestedByDisplayName}\t{qb.ShelvesetName}\t\"{s.Comment}\"");
-                    s.Changes.Select(c => c.FileName).ToList().ForEach(f =>
+                    s.Changes.ToList().ForEach(c =>
                     {
+                        var f = c.FileName;
                         if (f.Contains("ReferenceVersions.xml"))
                         {
                             if (!refRequests.ContainsKey(f)) refRequests.Add(f, new List<int>());
                             refRequests[f].Add(qb.Id);
-                            myOut.Info($"\t{f}");
+                            myOut.Info($"\t{f} : {VersionFromReferenceFile(c.DownloadBaseFile())} --> {VersionFromReferenceFile(c.DownloadShelvedFile())}");
                         }
                     });
                 }
@@ -93,6 +97,13 @@ namespace CleanQueue
 
         }
 
+        static string VersionFromReferenceFile(Stream stream)
+        {
+            var d = XDocument.Load(stream);
+            var version = d.Descendants().FirstOrDefault(p => p.Name.LocalName == "Version");
+            return version != null ? version.Value : "???";
+        }
+
         private class ShelvesetInfo
         {
             public ShelvesetInfo(IVersionControlServer vcs, IQueuedBuild qb)
@@ -108,7 +119,7 @@ namespace CleanQueue
             }
             private readonly IVersionControlServer vcs;
             public int RequestId { get; }
-            public List<string> Modules { get; set; }
+            public List<string> Modules { get; }
             public bool HasAdditionalChanges { get; set; }
             public string ShelvesetName { get; }
             public string Owner { get; }
