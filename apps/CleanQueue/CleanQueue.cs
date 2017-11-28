@@ -60,7 +60,13 @@ namespace CleanQueue
                         {
                             if (!refRequests.ContainsKey(f)) refRequests.Add(f, new List<int>());
                             refRequests[f].Add(qb.Id);
-                            myOut.Info($"\t{f} : {VersionFromReferenceFile(c.DownloadBaseFile())} --> {VersionFromReferenceFile(c.DownloadShelvedFile())}");
+                            var li = vcs.GetItem(c.ServerItem);
+                            var latestVersion = li != null ? VersionFromReferenceFile(li.DownloadFile()) : "n/a";
+                            var fromVersion = VersionFromReferenceFile(c.DownloadBaseFile());
+                            var toVersion = VersionFromReferenceFile(c.DownloadShelvedFile());
+                            var errorMessage = string.Empty;
+                            if (fromVersion != latestVersion && toVersion != latestVersion) errorMessage = $"merge conflict expected, because latest version is {latestVersion}";
+                            myOut.Info($"\t{f,-53} : {fromVersion} --> {toVersion} {errorMessage}");
                         }
                     });
                 }
