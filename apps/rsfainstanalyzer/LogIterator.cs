@@ -24,10 +24,14 @@ namespace rsfainstanalyzer
             var root = Path.GetDirectoryName(path);
             var dirPattern = path.Substring(root.Length + 1);
             var minDay = days > 0 ? DateTime.Today - TimeSpan.FromDays(days) : DateTime.MinValue;
-            myDirNames = Directory.GetFileSystemEntries(root, dirPattern, SearchOption.TopDirectoryOnly).
-                Where(d => Directory.GetCreationTime(d) > minDay).
-                OrderBy(d => d.Substring(0, d.LastIndexOf('.'))).ThenBy(d => int.Parse(d.Substring(d.LastIndexOf('.') + 1))).
-                ToArray();
+            var allMatchingDirNames =
+                Directory.GetFileSystemEntries(root, dirPattern, SearchOption.TopDirectoryOnly).
+                Where(d => Directory.GetCreationTime(d) > minDay);
+            if (allMatchingDirNames.All(d => Path.GetFileName(d).Contains(".")))
+                myDirNames = allMatchingDirNames.
+                    OrderBy(d => d.Substring(0, d.LastIndexOf('.'))).ThenBy(d => int.Parse(d.Substring(d.LastIndexOf('.') + 1))).
+                    ToArray();
+            else myDirNames = allMatchingDirNames.ToArray();
             myLogName = logname;
             myOutput.Info("Processing {0} build results...", myDirNames.Length);
             myDirNames.ToList().ForEach(d =>
